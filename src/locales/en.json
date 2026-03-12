@@ -128,7 +128,22 @@
     "horas": "hours",
     "hasta": "Up to",
     "personas": "guests",
-    "reservar": "Book"
+    "reservar": "Book",
+    "desc_ali_party": "No overnight stay · 3pm to 12am",
+    "desc_pijama_party": "With overnight stay · Check-in 3pm to 11am",
+    "desc_pijama_party_deluxe": "With overnight stay and suite · Check-in 3pm to 11am",
+    "c_asador": "🔥 BBQ area",
+    "c_alberca": "🏊 Swimming pool",
+    "c_bar": "🍹 Climate-controlled bar area",
+    "c_brincolines": "🤸 Bounce house area",
+    "c_futbol": "⚽ Soccer field",
+    "c_juegos": "🎠 Kids playground",
+    "c_palapa": "🌴 Palapa with tables & chairs for 100 guests",
+    "c_casa": "🏠 Equipped house with terrace, kitchen & living room",
+    "c_cuartos": "🛏️ 2 furnished rooms (cap. 20 guests)",
+    "c_cuartos_base": "🛏️ 2 furnished rooms",
+    "c_suite": "🛁 Suite with jacuzzi",
+    "c_litera": "🪜 Bunk beds (cap. 25 guests)"
   },
   "contacto": {
     "titulo": "Contact",

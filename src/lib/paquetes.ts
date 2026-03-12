@@ -9,6 +9,7 @@ export interface Paquete {
   emoji: string;
   imagen_url?: string;
   caracteristicas?: string[];
+  slug?: string;
 }
 
 // Fallback estático (se usa si la API no responde)

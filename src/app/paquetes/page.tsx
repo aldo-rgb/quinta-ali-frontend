@@ -10,8 +10,33 @@ import { fetchAPI } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 
 export default function PaquetesPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [paquetes, setPaquetes] = useState<Paquete[]>(paquetesFallback);
+
+  // Mapa de traducciones: slug → claves i18n
+  const descMap: Record<string, string> = {
+    'ali-party': 'paquetes.desc_ali_party',
+    'pijama-party': 'paquetes.desc_pijama_party',
+    'pijama-party-deluxe': 'paquetes.desc_pijama_party_deluxe',
+  };
+
+  const caracMap: Record<string, string[]> = {
+    'ali-party': ['paquetes.c_asador', 'paquetes.c_alberca', 'paquetes.c_bar', 'paquetes.c_brincolines', 'paquetes.c_futbol', 'paquetes.c_juegos', 'paquetes.c_palapa'],
+    'pijama-party': ['paquetes.c_asador', 'paquetes.c_alberca', 'paquetes.c_bar', 'paquetes.c_brincolines', 'paquetes.c_futbol', 'paquetes.c_juegos', 'paquetes.c_palapa', 'paquetes.c_casa', 'paquetes.c_cuartos'],
+    'pijama-party-deluxe': ['paquetes.c_asador', 'paquetes.c_alberca', 'paquetes.c_bar', 'paquetes.c_brincolines', 'paquetes.c_futbol', 'paquetes.c_juegos', 'paquetes.c_palapa', 'paquetes.c_casa', 'paquetes.c_cuartos_base', 'paquetes.c_suite', 'paquetes.c_litera'],
+  };
+
+  function getDesc(paq: Paquete) {
+    const key = descMap[paq.slug || ''];
+    if (key) return t(key);
+    return paq.descripcion;
+  }
+
+  function getCaracs(paq: Paquete) {
+    const keys = caracMap[paq.slug || ''];
+    if (keys) return keys.map(k => t(k));
+    return paq.caracteristicas || [];
+  }
 
   useEffect(() => {
     fetchAPI('/api/paquetes').then((data) => {
@@ -75,11 +100,11 @@ export default function PaquetesPage() {
             </div>
 
             <div className="p-5">
-              <p className="text-gray-600 text-sm">{paq.descripcion}</p>
+              <p className="text-gray-600 text-sm">{getDesc(paq)}</p>
 
-              {paq.caracteristicas && paq.caracteristicas.length > 0 && (
+              {getCaracs(paq).length > 0 && (
                 <ul className="mt-3 space-y-1.5">
-                  {paq.caracteristicas.map((c, i) => (
+                  {getCaracs(paq).map((c, i) => (
                     <li key={i} className="text-sm text-gray-600">{c}</li>
                   ))}
                 </ul>

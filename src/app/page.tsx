@@ -17,12 +17,23 @@ import { fetchAPI } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 
 export default function Home() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { data: session } = useSession();
   const [paquetes, setPaquetes] = useState<Paquete[]>(paquetesFallback);
   const destacados = paquetes.slice(0, 3);
   const [galeriaArea, setGaleriaArea] = useState<{ area: string; label: string; emoji: string } | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+
+  const descMap: Record<string, string> = {
+    'ali-party': 'paquetes.desc_ali_party',
+    'pijama-party': 'paquetes.desc_pijama_party',
+    'pijama-party-deluxe': 'paquetes.desc_pijama_party_deluxe',
+  };
+  function getDesc(paq: Paquete) {
+    const key = descMap[paq.slug || ''];
+    if (key) return t(key);
+    return paq.descripcion;
+  }
   const [heroTexts, setHeroTexts] = useState<Record<string, string>>({});
   const [amenidadFotos, setAmenidadFotos] = useState<Record<string, string>>({});
   const [areaFotosAll, setAreaFotosAll] = useState<Record<string, string[]>>({});
@@ -307,7 +318,7 @@ export default function Home() {
                     {paq.tipo_duracion === 'horas' ? `${paq.duracion_horas}h` : t('home.paquete_noche')}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{paq.descripcion}</p>
+                <p className="text-sm text-gray-500 mt-1">{getDesc(paq)}</p>
                 <div className="flex items-center justify-between mt-4">
                   <div>
                     <span className="text-2xl font-extrabold text-primary">

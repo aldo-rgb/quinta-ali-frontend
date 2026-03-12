@@ -128,7 +128,22 @@
     "horas": "horas",
     "hasta": "Hasta",
     "personas": "personas",
-    "reservar": "Reservar"
+    "reservar": "Reservar",
+    "desc_ali_party": "Sin estancia · De 3pm a 12am",
+    "desc_pijama_party": "Con estancia · Entrada de 3pm a 11am",
+    "desc_pijama_party_deluxe": "Con estancia y habitación suite · Entrada de 3pm a 11am",
+    "c_asador": "🔥 Zona de asador",
+    "c_alberca": "🏊 Alberca",
+    "c_bar": "🍹 Área de bar climatizada",
+    "c_brincolines": "🤸 Área de brincolines",
+    "c_futbol": "⚽ Cancha de futbol",
+    "c_juegos": "🎠 Área de juegos para niños",
+    "c_palapa": "🌴 Palapa con mesas y sillas para 100 personas",
+    "c_casa": "🏠 Casa equipada con terraza, cocina y sala",
+    "c_cuartos": "🛏️ 2 cuartos amueblados (cap. 20 personas)",
+    "c_cuartos_base": "🛏️ 2 cuartos amueblados",
+    "c_suite": "🛁 Suite con jacuzzi",
+    "c_litera": "🪜 Litera (cap. 25 personas)"
   },
   "contacto": {
     "titulo": "Contacto",
