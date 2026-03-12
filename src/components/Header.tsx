@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import LogoPremium from '@/components/LogoPremium';
+import Image from 'next/image';
 import { useI18n } from '@/lib/i18n';
 
 export default function Header() {
@@ -12,7 +12,7 @@ export default function Header() {
       <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
         <div className="w-16" />
         <Link href="/" className="flex items-center gap-2">
-          <LogoPremium size="sm" showSlogan={false} className="h-10 w-auto" />
+          <Image src="/logo.png" alt="La Quinta de Alí" width={120} height={40} className="h-10 w-auto" />
         </Link>
         <button
           onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}

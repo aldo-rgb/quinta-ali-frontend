@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import LogoPremium from '@/components/LogoPremium';
+import Image from 'next/image';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-section-green via-background to-section-cream flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <LogoPremium size="md" showSlogan={false} className="h-14 w-auto mx-auto mb-4" />
+          <Image src="/logo.png" alt="La Quinta de Alí" width={160} height={56} className="h-14 w-auto mx-auto mb-4" />
           <h1 className="text-foreground text-2xl font-extrabold">Conserje Digital</h1>
           <p className="text-foreground/50 text-sm mt-1">Panel de Administración</p>
         </div>

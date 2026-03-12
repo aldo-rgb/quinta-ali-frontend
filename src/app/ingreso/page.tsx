@@ -1,8 +1,8 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import Image from 'next/image';
 import Header from '@/components/Header';
-import LogoPremium from '@/components/LogoPremium';
 import { useI18n } from '@/lib/i18n';
 
 export default function PantallaIngreso() {
@@ -17,7 +17,7 @@ export default function PantallaIngreso() {
         <div className="w-full max-w-md bg-white/80 backdrop-blur-lg rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-primary-light/20 p-8 space-y-7">
           {/* Logo */}
           <div className="flex flex-col items-center">
-            <LogoPremium size="lg" showSlogan={true} className="h-24 w-auto" />
+            <Image src="/logo.png" alt="La Quinta de Alí" width={200} height={96} className="h-24 w-auto" />
             <h1 className="text-xl font-semibold text-center mt-4 text-foreground">{t('login.titulo')}</h1>
             <p className="text-gray-500 text-sm text-center mt-1.5">
               {t('login.subtitulo')}

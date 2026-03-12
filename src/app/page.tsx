@@ -15,7 +15,7 @@ import HeroCarousel from '@/components/HeroCarousel';
 import { Paquete, paquetesFallback } from '@/lib/paquetes';
 import { fetchAPI } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
-import LogoPremium from '@/components/LogoPremium';
+
 
 export default function Home() {
   const { t, locale } = useI18n();
@@ -141,7 +141,7 @@ export default function Home() {
         <div className="relative z-20 flex flex-col items-center justify-center px-4 text-center max-w-4xl mx-auto">
           {/* Logo */}
           <div className="animate-fade-in-up mb-4">
-            <LogoPremium size="xl" showSlogan={true} className="h-40 w-auto drop-shadow-2xl [&_text]:fill-white [&_text:last-child]:fill-white/60 [&_rect]:fill-white/30" />
+            <Image src="/logo.png" alt="La Quinta de Alí" width={300} height={160} className="h-40 w-auto drop-shadow-2xl" />
           </div>
 
           {/* Badge */}
@@ -642,7 +642,7 @@ export default function Home() {
       <footer className="px-6 pb-24 max-w-lg mx-auto text-center">
         <div className="border-t border-primary-light/20 pt-8">
           <div className="flex justify-center mb-3">
-            <LogoPremium size="md" showSlogan={true} className="h-14 w-auto" />
+            <Image src="/logo.png" alt="La Quinta de Alí" width={160} height={56} className="h-14 w-auto" />
           </div>
           <p className="text-xs text-gray-400 mt-2">
             © {new Date().getFullYear()} La Quinta de Alí. {t('home.footer_derechos')}
