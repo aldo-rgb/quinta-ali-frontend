@@ -15,6 +15,7 @@ import HeroCarousel from '@/components/HeroCarousel';
 import { Paquete, paquetesFallback } from '@/lib/paquetes';
 import { fetchAPI } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
+import LogoPremium from '@/components/LogoPremium';
 
 export default function Home() {
   const { t, locale } = useI18n();
@@ -139,14 +140,9 @@ export default function Home() {
 
         <div className="relative z-20 flex flex-col items-center justify-center px-4 text-center max-w-4xl mx-auto">
           {/* Logo */}
-          <Image
-            src="/logo.png"
-            alt="La Quinta de Alí"
-            width={360}
-            height={160}
-            className="animate-fade-in-up h-40 w-auto object-contain drop-shadow-2xl mb-4"
-            priority
-          />
+          <div className="animate-fade-in-up mb-4">
+            <LogoPremium size="xl" showSlogan={true} className="h-40 w-auto drop-shadow-2xl [&_text]:fill-white [&_text:last-child]:fill-white/60 [&_rect]:fill-white/30" />
+          </div>
 
           {/* Badge */}
           <span className="animate-fade-in-up inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-primary-light font-semibold tracking-wide uppercase text-xs px-4 py-2 rounded-full border border-white/20 mb-6">
@@ -645,13 +641,9 @@ export default function Home() {
       {/* ───────── 9. FOOTER ───────── */}
       <footer className="px-6 pb-24 max-w-lg mx-auto text-center">
         <div className="border-t border-primary-light/20 pt-8">
-          <Image
-            src="/logo.png"
-            alt="La Quinta de Alí"
-            width={160}
-            height={60}
-            className="h-14 w-auto object-contain mx-auto mb-3"
-          />
+          <div className="flex justify-center mb-3">
+            <LogoPremium size="md" showSlogan={true} className="h-14 w-auto" />
+          </div>
           <p className="text-xs text-gray-400 mt-2">
             © {new Date().getFullYear()} La Quinta de Alí. {t('home.footer_derechos')}
           </p>

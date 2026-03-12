@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" fill="none">
+  <!-- Mint accent line -->
+  <rect x="160" y="18" width="160" height="2.5" rx="1.25" fill="#A7D8CC" opacity="0.6"/>
+  
+  <!-- "La Quinta de" - elegant thin text -->
+  <text x="240" y="52" text-anchor="middle" font-family="'Poppins', 'Montserrat', system-ui, sans-serif" font-size="20" font-weight="400" letter-spacing="3" fill="#6B7B7A">
+    LA QUINTA DE
+  </text>
+  
+  <!-- "Alí" - bold premium -->
+  <text x="240" y="100" text-anchor="middle" font-family="'Poppins', 'Montserrat', system-ui, sans-serif" font-size="56" font-weight="700" letter-spacing="2" fill="#2D6A5E">
+    Alí
+  </text>
+  
+  <!-- Soft golden accent dot on the í -->
+  <circle cx="272" cy="62" r="4" fill="#D4A853" opacity="0.8"/>
+  
+  <!-- Bottom accent line -->
+  <rect x="160" y="112" width="160" height="2.5" rx="1.25" fill="#A7D8CC" opacity="0.6"/>
+  
+  <!-- Slogan -->
+  <text x="240" y="138" text-anchor="middle" font-family="'Poppins', 'Montserrat', system-ui, sans-serif" font-size="13" font-weight="300" letter-spacing="2.5" fill="#9AABA8">
+    MOMENTOS PREMIUM EN SANTIAGO
+  </text>
+</svg>
