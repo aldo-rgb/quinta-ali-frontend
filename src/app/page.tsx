@@ -131,9 +131,9 @@ export default function Home() {
           <Image
             src="/logo.png"
             alt="La Quinta de Alí"
-            width={220}
-            height={100}
-            className="animate-fade-in-up h-24 w-auto object-contain drop-shadow-2xl mb-4"
+            width={360}
+            height={160}
+            className="animate-fade-in-up h-40 w-auto object-contain drop-shadow-2xl mb-4"
             priority
           />
 
