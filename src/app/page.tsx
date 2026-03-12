@@ -102,13 +102,13 @@ export default function Home() {
   ];
 
   const galeriaAreas = [
-    { area: 'alberca', label: 'Alberca', emoji: '🏊', Icon: Waves, color: 'from-[#d4eef6] to-[#e8f4f8]' },
-    { area: 'asador', label: 'Asador', emoji: '🔥', Icon: Flame, color: 'from-[#f5e6d0] to-[#faf2e8]' },
-    { area: 'hospedaje', label: 'Hospedaje', emoji: '🛏️', Icon: BedDouble, color: 'from-[#e2ddf0] to-[#eeebf5]' },
-    { area: 'cancha', label: 'Cancha', emoji: '⚽', Icon: Target, color: 'from-[#d4edda] to-[#e6f0eb]' },
-    { area: 'jacuzzi', label: 'Jacuzzi', emoji: '🫧', Icon: Droplets, color: 'from-[#d0e8f5] to-[#e4f0f8]' },
-    { area: 'palapa', label: 'Palapa', emoji: '🌴', Icon: TreePine, color: 'from-[#e8edd0] to-[#f2f5e8]' },
-    { area: 'juegos', label: 'Área de Juegos', emoji: '🎠', Icon: Gamepad2, color: 'from-[#f5ddd4] to-[#faf0eb]' },
+    { area: 'alberca', labelKey: 'home.galeria_alberca', emoji: '🏊', Icon: Waves, color: 'from-[#d4eef6] to-[#e8f4f8]' },
+    { area: 'asador', labelKey: 'home.galeria_asador', emoji: '🔥', Icon: Flame, color: 'from-[#f5e6d0] to-[#faf2e8]' },
+    { area: 'hospedaje', labelKey: 'home.galeria_hospedaje', emoji: '🛏️', Icon: BedDouble, color: 'from-[#e2ddf0] to-[#eeebf5]' },
+    { area: 'cancha', labelKey: 'home.galeria_cancha', emoji: '⚽', Icon: Target, color: 'from-[#d4edda] to-[#e6f0eb]' },
+    { area: 'jacuzzi', labelKey: 'home.galeria_jacuzzi', emoji: '🫧', Icon: Droplets, color: 'from-[#d0e8f5] to-[#e4f0f8]' },
+    { area: 'palapa', labelKey: 'home.galeria_palapa', emoji: '🌴', Icon: TreePine, color: 'from-[#e8edd0] to-[#f2f5e8]' },
+    { area: 'juegos', labelKey: 'home.galeria_juegos', emoji: '🎠', Icon: Gamepad2, color: 'from-[#f5ddd4] to-[#faf0eb]' },
   ];
 
   const testimonios = [1, 2, 3].map((i) => ({
@@ -185,7 +185,7 @@ export default function Home() {
             <button
               key={item.area}
               type="button"
-              onClick={() => setGaleriaArea(item)}
+              onClick={() => setGaleriaArea({ area: item.area, label: t(item.labelKey), emoji: item.emoji })}
               className={`${idx === galeriaAreas.length - 1 ? 'col-span-2 aspect-[2/1]' : 'aspect-square'} rounded-2xl overflow-hidden relative flex flex-col items-center justify-center gap-2 border border-primary-light/20 active:scale-[0.97] transition-transform cursor-pointer group`}
             >
               {areaFotosAll[item.area] && areaFotosAll[item.area].length > 0 ? (
@@ -194,7 +194,7 @@ export default function Home() {
                     <Image
                       key={url}
                       src={url}
-                      alt={item.label}
+                      alt={t(item.labelKey)}
                       fill
                       className={`object-cover transition-opacity duration-700 ${fIdx === (carouselIdx[item.area] || 0) ? 'opacity-100' : 'opacity-0'}`}
                       sizes="(max-width: 768px) 50vw, 250px"
@@ -202,7 +202,7 @@ export default function Home() {
                   ))}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                   <div className="relative z-10 mt-auto mb-3">
-                    <span className="text-white text-sm font-bold drop-shadow-lg">{item.label}</span>
+                    <span className="text-white text-sm font-bold drop-shadow-lg">{t(item.labelKey)}</span>
                     <span className="block text-white/80 text-[10px] font-medium">{t('home.galeria_ver')} →</span>
                   </div>
                   {areaFotosAll[item.area].length > 1 && (
@@ -216,7 +216,7 @@ export default function Home() {
               ) : (
                 <div className={`absolute inset-0 bg-gradient-to-br ${item.color} flex flex-col items-center justify-center gap-2`}>
                   <item.Icon className="w-10 h-10 text-gray-500/60" />
-                  <span className="text-xs font-semibold text-gray-600">{item.label}</span>
+                  <span className="text-xs font-semibold text-gray-600">{t(item.labelKey)}</span>
                   <span className="text-[10px] text-primary font-medium">{t('home.galeria_ver')} →</span>
                 </div>
               )}
