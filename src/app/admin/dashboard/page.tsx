@@ -2120,7 +2120,7 @@ export default function AdminDashboard() {
                         <XAxis type="number" tickFormatter={(v: number) => `$${(v/1000).toFixed(0)}k`} fontSize={10} />
                         <YAxis dataKey="nombre" type="category" width={70} fontSize={11} tickLine={false} axisLine={false} />
                         <Tooltip
-                          formatter={(value: number) => [`$${value.toLocaleString('es-MX')}`, 'Ventas']}
+                          formatter={(value) => [`$${Number(value).toLocaleString('es-MX')}`, 'Ventas']}
                           contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '12px' }}
                         />
                         <Bar dataKey="ventas" radius={[0, 8, 8, 0]} barSize={24}>
