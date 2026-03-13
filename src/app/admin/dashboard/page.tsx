@@ -10,11 +10,13 @@ import {
   Check, Save, Eye, Send, Rocket, Upload, Sparkles, Lightbulb, Home, Palette,
   MessageSquare, PenTool, Flame, Moon, Timer, Users, Sun, AlertTriangle,
   Waves, BedDouble, Droplets, TreePine, Gamepad2, Target, ListChecks, Heart,
-  CreditCard, Loader2, XCircle, CheckCircle2, History, ChevronDown, Phone, Mail, Building2
+  CreditCard, Loader2, XCircle, CheckCircle2, History, ChevronDown, Phone, Mail, Building2,
+  UserPlus, Trophy
 } from 'lucide-react';
 import { fetchAPI } from '@/lib/api';
 import { useTheme } from '@/lib/theme';
 import ReportesTab from '@/components/ReportesTab';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 function adminHeaders(extra?: Record<string, string>): Record<string, string> {
   const h: Record<string, string> = { ...extra };
@@ -40,6 +42,7 @@ interface Reservacion {
   monto_total: number;
   monto_pagado: number;
   notas: string;
+  promotor: string | null;
 }
 
 interface Foto {
@@ -166,7 +169,7 @@ const estadoColors: Record<string, string> = {
 export default function AdminDashboard() {
   const router = useRouter();
   const { colors, updateColors, saving } = useTheme();
-  const [activeTab, setActiveTab] = useState<'reservaciones' | 'hoy' | 'galeria' | 'extras' | 'paquetes' | 'accesos' | 'resenas' | 'precios' | 'reportes' | 'config' | 'terminal' | 'corporativo'>('reservaciones');
+  const [activeTab, setActiveTab] = useState<'reservaciones' | 'hoy' | 'galeria' | 'extras' | 'paquetes' | 'accesos' | 'resenas' | 'precios' | 'reportes' | 'config' | 'terminal' | 'corporativo' | 'promotores'>('reservaciones');
   const [reservaciones, setReservaciones] = useState<Reservacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -248,6 +251,22 @@ export default function AdminDashboard() {
   }
   const [leadsCorp, setLeadsCorp] = useState<LeadCorporativo[]>([]);
   const [corpCargando, setCorpCargando] = useState(false);
+
+  // Promotores state
+  interface Promotor {
+    id: number; nombre: string; email: string; codigo_ref: string;
+    comision_porcentaje: string; activo: boolean; creado_en: string;
+  }
+  interface PromotorStats {
+    ingresos_brutos: number; total_comisiones: number; ingresos_netos: number;
+    leaderboard: { id: number; nombre: string; codigo_ref: string; comision_porcentaje: string; reservas: number; ventas: number; comision: number }[];
+  }
+  const [promotores, setPromotores] = useState<Promotor[]>([]);
+  const [promotorStats, setPromotorStats] = useState<PromotorStats | null>(null);
+  const [promCargando, setPromCargando] = useState(false);
+  const [nuevoPromotor, setNuevoPromotor] = useState({ nombre: '', email: '', password: '', codigo_ref: '', comision_porcentaje: '10' });
+  const [promCreando, setPromCreando] = useState(false);
+  const [promError, setPromError] = useState('');
 
   const cargarHeroTexts = useCallback(async () => {
     try {
@@ -486,6 +505,13 @@ export default function AdminDashboard() {
     if (activeTab === 'corporativo') {
       setCorpCargando(true);
       fetchAPI('/api/corporativo/leads').then(setLeadsCorp).catch(() => {}).finally(() => setCorpCargando(false));
+    }
+    if (activeTab === 'promotores') {
+      setPromCargando(true);
+      Promise.all([
+        fetchAPI('/api/promotores').then(setPromotores).catch(() => {}),
+        fetchAPI('/api/promotores/admin/stats').then(setPromotorStats).catch(() => {}),
+      ]).finally(() => setPromCargando(false));
     }
     if (activeTab === 'terminal') {
       cargarExtras();
@@ -2059,6 +2085,180 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* ───────── PROMOTORES TAB (Vista del Jefe) ───────── */}
+      {activeTab === 'promotores' && (
+        <div className="space-y-4">
+          {promCargando ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : (
+            <>
+              {/* Métricas del negocio */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white/70 rounded-xl border border-primary-light/15 p-4 text-center">
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase">Ingresos Brutos</p>
+                  <p className="text-xl font-extrabold text-gray-800 mt-1">${(promotorStats?.ingresos_brutos ?? 0).toLocaleString('es-MX')}</p>
+                </div>
+                <div className="bg-white/70 rounded-xl border border-red-100 p-4 text-center">
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase">Comisiones</p>
+                  <p className="text-xl font-extrabold text-red-600 mt-1">-${(promotorStats?.total_comisiones ?? 0).toLocaleString('es-MX')}</p>
+                </div>
+                <div className="bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl p-4 text-center text-white">
+                  <p className="text-[10px] text-teal-100 font-semibold uppercase">Tu Ganancia</p>
+                  <p className="text-xl font-extrabold mt-1">${(promotorStats?.ingresos_netos ?? 0).toLocaleString('es-MX')}</p>
+                </div>
+              </div>
+
+              {/* Leaderboard */}
+              {promotorStats?.leaderboard && promotorStats.leaderboard.length > 0 && (
+                <div className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
+                  <h3 className="font-bold text-sm flex items-center gap-2 mb-4">
+                    <Trophy className="w-4 h-4 text-yellow-500" /> Ranking de Vendedores — {new Date().toLocaleDateString('es-MX', { month: 'long' })}
+                  </h3>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={promotorStats.leaderboard} layout="vertical" margin={{ left: 0, right: 8, top: 0, bottom: 0 }}>
+                        <XAxis type="number" tickFormatter={(v: number) => `$${(v/1000).toFixed(0)}k`} fontSize={10} />
+                        <YAxis dataKey="nombre" type="category" width={70} fontSize={11} tickLine={false} axisLine={false} />
+                        <Tooltip
+                          formatter={(value: number) => [`$${value.toLocaleString('es-MX')}`, 'Ventas']}
+                          contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+                        />
+                        <Bar dataKey="ventas" radius={[0, 8, 8, 0]} barSize={24}>
+                          {promotorStats.leaderboard.map((_, i) => (
+                            <Cell key={i} fill={i === 0 ? '#0d9488' : i === 1 ? '#5eead4' : '#d1d5db'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Lista de detalle */}
+                  <div className="mt-4 space-y-2">
+                    {promotorStats.leaderboard.map((p, i) => (
+                      <div key={p.id} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-gray-100 text-gray-600' : 'bg-gray-50 text-gray-400'}`}>
+                            {i + 1}
+                          </span>
+                          <span className="font-semibold">{p.nombre}</span>
+                          <span className="text-xs text-gray-400">({p.codigo_ref})</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-bold text-primary">{p.reservas} ventas</span>
+                          <span className="text-xs text-gray-400 ml-2">${p.comision.toLocaleString('es-MX')} com.</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Lista de promotores */}
+              <div className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-sm flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" /> Promotores ({promotores.length})
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {promotores.map((p) => (
+                    <div key={p.id} className={`flex items-center justify-between p-3 rounded-lg ${p.activo ? 'bg-gray-50' : 'bg-red-50/50'}`}>
+                      <div>
+                        <p className="font-semibold text-sm">{p.nombre}</p>
+                        <p className="text-xs text-gray-400">{p.email} · ref: <span className="font-mono text-primary">{p.codigo_ref}</span></p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-teal-600">{p.comision_porcentaje}%</span>
+                        <p className={`text-[10px] ${p.activo ? 'text-green-500' : 'text-red-400'}`}>{p.activo ? 'Activo' : 'Inactivo'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Crear nuevo promotor */}
+              <div className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
+                <h3 className="font-bold text-sm flex items-center gap-2 mb-3">
+                  <UserPlus className="w-4 h-4 text-primary" /> Registrar Promotor
+                </h3>
+                {promError && <p className="text-xs text-red-500 mb-2">{promError}</p>}
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Nombre completo"
+                    value={nuevoPromotor.nombre}
+                    onChange={(e) => setNuevoPromotor(p => ({ ...p, nombre: e.target.value }))}
+                    className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={nuevoPromotor.email}
+                    onChange={(e) => setNuevoPromotor(p => ({ ...p, email: e.target.value }))}
+                    className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Contraseña"
+                    value={nuevoPromotor.password}
+                    onChange={(e) => setNuevoPromotor(p => ({ ...p, password: e.target.value }))}
+                    className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Código ref (ej: aldo)"
+                      value={nuevoPromotor.codigo_ref}
+                      onChange={(e) => setNuevoPromotor(p => ({ ...p, codigo_ref: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') }))}
+                      className="w-full p-2.5 rounded-lg border border-gray-200 text-sm font-mono"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Comisión %"
+                      value={nuevoPromotor.comision_porcentaje}
+                      onChange={(e) => setNuevoPromotor(p => ({ ...p, comision_porcentaje: e.target.value }))}
+                      className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                    />
+                  </div>
+                  <button
+                    disabled={promCreando || !nuevoPromotor.nombre || !nuevoPromotor.email || !nuevoPromotor.password || !nuevoPromotor.codigo_ref}
+                    onClick={async () => {
+                      setPromCreando(true);
+                      setPromError('');
+                      try {
+                        await fetchAPI('/api/promotores', {
+                          method: 'POST',
+                          body: JSON.stringify({
+                            nombre: nuevoPromotor.nombre,
+                            email: nuevoPromotor.email,
+                            password: nuevoPromotor.password,
+                            codigo_ref: nuevoPromotor.codigo_ref,
+                            comision_porcentaje: Number(nuevoPromotor.comision_porcentaje) || 10,
+                          }),
+                        });
+                        setNuevoPromotor({ nombre: '', email: '', password: '', codigo_ref: '', comision_porcentaje: '10' });
+                        const [pList, pStats] = await Promise.all([
+                          fetchAPI('/api/promotores'),
+                          fetchAPI('/api/promotores/admin/stats'),
+                        ]);
+                        setPromotores(pList);
+                        setPromotorStats(pStats);
+                      } catch (err) {
+                        setPromError(err instanceof Error ? err.message : 'Error creando promotor');
+                      } finally {
+                        setPromCreando(false);
+                      }
+                    }}
+                    className="w-full bg-primary text-white font-semibold py-2.5 rounded-lg text-sm disabled:bg-gray-300 active:scale-[0.98] transition-transform"
+                  >
+                    {promCreando ? 'Creando...' : 'Crear Promotor'}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Admin bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-lg border-t border-primary-light/20 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
         <div className="flex justify-around items-center h-16 max-w-lg mx-auto overflow-x-auto">
@@ -2073,6 +2273,7 @@ export default function AdminDashboard() {
             { key: 'reportes' as const, Icon: BarChart3, label: 'Reportes' },
             { key: 'terminal' as const, Icon: CreditCard, label: 'Terminal' },
             { key: 'corporativo' as const, Icon: Building2, label: 'B2B' },
+            { key: 'promotores' as const, Icon: Trophy, label: 'Promotores' },
             { key: 'galeria' as const, Icon: Camera, label: 'Galería' },
             { key: 'config' as const, Icon: Settings, label: 'Config' },
           ].map((tab) => (
