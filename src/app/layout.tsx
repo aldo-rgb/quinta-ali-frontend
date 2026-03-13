@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import AuthProvider from "@/components/AuthProvider";
+import RastreadorRef from "@/components/RastreadorRef";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
@@ -56,6 +58,7 @@ export default function RootLayout({
         <ThemeProvider>
           <I18nProvider>
             <AuthProvider>
+              <Suspense><RastreadorRef /></Suspense>
               {children}
             </AuthProvider>
           </I18nProvider>

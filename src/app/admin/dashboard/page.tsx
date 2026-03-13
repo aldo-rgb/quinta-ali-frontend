@@ -783,6 +783,11 @@ export default function AdminDashboard() {
                   {res.notas && (
                     <p className="text-xs text-gray-400 italic">{res.notas}</p>
                   )}
+                  {res.promotor && (
+                    <p className="flex items-center gap-2 text-xs text-purple-600 font-semibold">
+                      🤝 Promotor: {res.promotor}
+                    </p>
+                  )}
                   {res.cliente_telefono && (
                     <a
                       href={`https://wa.me/${res.cliente_telefono.replace(/\D/g, '')}`}

@@ -52,6 +52,7 @@ function ReservarContent() {
     hora_inicio: '15:00',
     num_invitados: '',
     notas: '',
+    promotor: '',
   });
 
   useEffect(() => {
@@ -70,6 +71,14 @@ function ReservarContent() {
       }));
     }
   }, [session, esInvitado, nombreParam, emailParam, telefonoParam]);
+
+  // Leer promotor de localStorage (guardado por RastreadorRef con ?ref=)
+  useEffect(() => {
+    const promotorGuardado = localStorage.getItem('promotor_quinta');
+    if (promotorGuardado) {
+      setForm((prev) => ({ ...prev, promotor: prev.promotor || promotorGuardado }));
+    }
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -233,6 +242,7 @@ function ReservarContent() {
           notas: form.notas || undefined,
           ine_url: ineUrl || undefined,
           extras: extrasArray,
+          promotor: form.promotor || undefined,
         }),
       });
 
@@ -727,6 +737,19 @@ function ReservarContent() {
               rows={3}
               className="w-full p-3 rounded-xl border border-gray-200 text-base resize-none"
             />
+          </div>
+
+          {/* Promotor / Referido */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">{t('reservar.promotor_label')}</label>
+            <input
+              type="text"
+              value={form.promotor}
+              onChange={(e) => updateField('promotor', e.target.value)}
+              placeholder={t('reservar.promotor_placeholder')}
+              className="w-full p-3 rounded-xl border border-gray-200 text-base"
+            />
+            <p className="text-xs text-gray-400 mt-1">{t('reservar.promotor_hint')}</p>
           </div>
 
           {/* Subir INE / Identificación */}
