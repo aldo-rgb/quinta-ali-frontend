@@ -831,8 +831,15 @@ export default function AdminDashboard() {
                 <button onClick={() => cambiarEstado(res.id, 'confirmada')} className="flex-1 bg-green-50 text-green-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
                   ✓ Confirmar
                 </button>
-                <button onClick={() => cambiarEstado(res.id, 'cancelada')} className="flex-1 bg-red-50 text-red-600 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
+                <button onClick={() => { if (confirm('¿Cancelar esta reservación?')) cambiarEstado(res.id, 'cancelada'); }} className="flex-1 bg-red-50 text-red-600 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
                   ✕ Cancelar
+                </button>
+              </div>
+              )}
+              {(res.estado === 'confirmada' || res.estado === 'pagada') && (
+              <div className="mt-3">
+                <button onClick={() => { if (confirm('¿Seguro que quieres cancelar esta reservación?')) cambiarEstado(res.id, 'cancelada'); }} className="w-full bg-red-50 text-red-600 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
+                  ✕ Cancelar reservación
                 </button>
               </div>
               )}
