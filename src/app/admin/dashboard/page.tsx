@@ -266,7 +266,7 @@ export default function AdminDashboard() {
   const [promotores, setPromotores] = useState<Promotor[]>([]);
   const [promotorStats, setPromotorStats] = useState<PromotorStats | null>(null);
   const [promCargando, setPromCargando] = useState(false);
-  const [nuevoPromotor, setNuevoPromotor] = useState({ nombre: '', email: '', password: '', codigo_ref: '', comision_porcentaje: '10' });
+  const [nuevoPromotor, setNuevoPromotor] = useState({ nombre: '', codigo_ref: '', comision_porcentaje: '10' });
   const [promCreando, setPromCreando] = useState(false);
   const [promError, setPromError] = useState('');
 
@@ -2267,20 +2267,6 @@ export default function AdminDashboard() {
                     onChange={(e) => setNuevoPromotor(p => ({ ...p, nombre: e.target.value }))}
                     className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
                   />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={nuevoPromotor.email}
-                    onChange={(e) => setNuevoPromotor(p => ({ ...p, email: e.target.value }))}
-                    className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
-                  />
-                  <input
-                    type="password"
-                    placeholder="Contraseña"
-                    value={nuevoPromotor.password}
-                    onChange={(e) => setNuevoPromotor(p => ({ ...p, password: e.target.value }))}
-                    className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
-                  />
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
@@ -2298,7 +2284,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <button
-                    disabled={promCreando || !nuevoPromotor.nombre || !nuevoPromotor.email || !nuevoPromotor.password || !nuevoPromotor.codigo_ref}
+                    disabled={promCreando || !nuevoPromotor.nombre || !nuevoPromotor.codigo_ref}
                     onClick={async () => {
                       setPromCreando(true);
                       setPromError('');
@@ -2307,13 +2293,11 @@ export default function AdminDashboard() {
                           method: 'POST',
                           body: JSON.stringify({
                             nombre: nuevoPromotor.nombre,
-                            email: nuevoPromotor.email,
-                            password: nuevoPromotor.password,
                             codigo_ref: nuevoPromotor.codigo_ref,
                             comision_porcentaje: Number(nuevoPromotor.comision_porcentaje) || 10,
                           }),
                         });
-                        setNuevoPromotor({ nombre: '', email: '', password: '', codigo_ref: '', comision_porcentaje: '10' });
+                        setNuevoPromotor({ nombre: '', codigo_ref: '', comision_porcentaje: '10' });
                         const [pList, pStats] = await Promise.all([
                           fetchAPI('/api/promotores'),
                           fetchAPI('/api/promotores/admin/stats'),
