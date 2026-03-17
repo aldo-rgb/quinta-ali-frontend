@@ -2229,9 +2229,24 @@ export default function AdminDashboard() {
                         <p className="font-semibold text-sm">{p.nombre}</p>
                         <p className="text-xs text-gray-400">{p.email} · ref: <span className="font-mono text-primary">{p.codigo_ref}</span></p>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-teal-600">{p.comision_porcentaje}%</span>
-                        <p className={`text-[10px] ${p.activo ? 'text-green-500' : 'text-red-400'}`}>{p.activo ? 'Activo' : 'Inactivo'}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <span className="text-xs font-bold text-teal-600">{p.comision_porcentaje}%</span>
+                          <p className={`text-[10px] ${p.activo ? 'text-green-500' : 'text-red-400'}`}>{p.activo ? 'Activo' : 'Inactivo'}</p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`¿Eliminar a ${p.nombre}? Esta acción no se puede deshacer.`)) return;
+                            try {
+                              await fetchAPI(`/api/promotores/${p.id}`, { method: 'DELETE' });
+                              setPromotores(promotores.filter(x => x.id !== p.id));
+                            } catch { alert('Error al eliminar'); }
+                          }}
+                          className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:text-red-600 hover:bg-red-100 active:scale-90 transition-all"
+                          title="Eliminar promotor"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   ))}
