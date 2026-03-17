@@ -1634,13 +1634,13 @@ export default function AdminDashboard() {
       {/* Config tab */}
       {activeTab === 'config' && (
         <div className="px-4 mt-4 max-w-lg mx-auto space-y-3">
-          {/* QR Codes */}
-          <Link href="/admin/qr-codes" className="block bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-4 active:scale-[0.98] transition-transform shadow-sm">
+          {/* QR de Soporte */}
+          <Link href="/admin/qr-codes" className="block bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl p-4 active:scale-[0.98] transition-transform shadow-sm">
             <div className="flex items-center gap-3">
               <Smartphone className="w-6 h-6" />
               <div>
-                <p className="font-bold text-sm">QR Codes para la Quinta</p>
-                <p className="text-xs text-white/80">3 códigos WhatsApp: Compras, Mantenimiento, Soporte</p>
+                <p className="font-bold text-sm">🚨 QR — Botón de Pánico</p>
+                <p className="text-xs text-white/80">Reportes e incidentes vía WhatsApp</p>
               </div>
               <span className="ml-auto text-lg">→</span>
             </div>
