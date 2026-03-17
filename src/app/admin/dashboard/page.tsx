@@ -43,6 +43,8 @@ interface Reservacion {
   monto_pagado: number;
   notas: string;
   promotor: string | null;
+  checkin_at: string | null;
+  checkout_at: string | null;
 }
 
 interface Foto {
@@ -383,6 +385,25 @@ export default function AdminDashboard() {
       cargarReservaciones();
     } catch (err) {
       console.error('Error actualizando estado:', err);
+    }
+  }
+
+  async function registrarCheckin(id: number) {
+    try {
+      await fetchAPI(`/api/reservaciones/${id}/checkin`, { method: 'PATCH' });
+      cargarReservaciones();
+    } catch (err) {
+      console.error('Error registrando check-in:', err);
+    }
+  }
+
+  async function registrarCheckout(id: number) {
+    if (!confirm('¿Registrar check-out? La reservación se marcará como completada.')) return;
+    try {
+      await fetchAPI(`/api/reservaciones/${id}/checkout`, { method: 'PATCH' });
+      cargarReservaciones();
+    } catch (err) {
+      console.error('Error registrando check-out:', err);
     }
   }
 
@@ -823,6 +844,30 @@ export default function AdminDashboard() {
                     >
                       <Smartphone className="w-3.5 h-3.5" /> WhatsApp
                     </a>
+                  )}
+
+                  {/* Check-in / Check-out */}
+                  {(res.estado === 'confirmada' || res.estado === 'pagada') && (
+                    <div className="flex gap-2 mt-2">
+                      {!res.checkin_at ? (
+                        <button onClick={() => registrarCheckin(res.id)} className="flex-1 bg-blue-50 text-blue-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
+                          📥 Check-in
+                        </button>
+                      ) : (
+                        <span className="flex-1 text-center text-xs text-blue-600 bg-blue-50 py-2 rounded-lg font-medium">
+                          ✅ Check-in: {new Date(res.checkin_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                      {res.checkin_at && !res.checkout_at ? (
+                        <button onClick={() => registrarCheckout(res.id)} className="flex-1 bg-orange-50 text-orange-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
+                          📤 Check-out
+                        </button>
+                      ) : res.checkout_at ? (
+                        <span className="flex-1 text-center text-xs text-orange-600 bg-orange-50 py-2 rounded-lg font-medium">
+                          ✅ Check-out: {new Date(res.checkout_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      ) : null}
+                    </div>
                   )}
                 </div>
               )}

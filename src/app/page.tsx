@@ -608,6 +608,12 @@ export default function Home() {
           >
             {t('home.urgencia_cta')}
           </Link>
+          <Link
+            href="/disponibilidad"
+            className="block mt-3 text-sm font-semibold text-primary underline underline-offset-4 hover:text-primary/80"
+          >
+            📅 Ver calendario de disponibilidad
+          </Link>
         </div>
 
         <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
