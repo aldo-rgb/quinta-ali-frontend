@@ -881,7 +881,7 @@ export default function AdminDashboard() {
                 </button>
               </div>
               )}
-              {(res.estado === 'confirmada' || res.estado === 'pagada') && (
+              {(res.estado === 'confirmada' || res.estado === 'pagada' || res.estado === 'completada') && (
               <div className="mt-3">
                 <button onClick={() => { if (confirm('¿Seguro que quieres cancelar esta reservación?')) cambiarEstado(res.id, 'cancelada'); }} className="w-full bg-red-50 text-red-600 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform">
                   ✕ Cancelar reservación
