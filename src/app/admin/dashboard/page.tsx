@@ -127,6 +127,7 @@ interface Stats {
   pendientes: number;
   ingresos_mes: number;
   ingresos_extras_mes: number;
+  ingresos_terminal_mes: number;
   top_extras: { nombre: string; emoji: string; veces: string; ingreso: string }[];
 }
 
@@ -741,10 +742,16 @@ export default function AdminDashboard() {
             ${(stats?.ingresos_mes ?? ingresos).toLocaleString('es-MX')}
           </p>
         </div>
-        <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15 col-span-2">
+        <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15">
           <p className="text-xs text-gray-400">Extras del mes</p>
           <p className="text-2xl font-extrabold text-accent mt-1">
             ${(stats?.ingresos_extras_mes ?? 0).toLocaleString('es-MX')}
+          </p>
+        </div>
+        <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15">
+          <p className="text-xs text-gray-400">Terminal del mes</p>
+          <p className="text-2xl font-extrabold text-blue-600 mt-1">
+            ${(stats?.ingresos_terminal_mes ?? 0).toLocaleString('es-MX')}
           </p>
         </div>
       </div>
