@@ -87,7 +87,7 @@ function ReservarContent() {
   const [clienteId, setClienteId] = useState<number | null>(null);
   const [codigoPin, setCodigoPin] = useState<string | null>(null);
   const [pagando, setPagando] = useState(false);
-  const [metodoPago, setMetodoPago] = useState<'credito' | 'debito' | 'spei' | null>(null);
+  const [metodoPago, setMetodoPago] = useState<'credito' | 'debito' | 'spei' | 'mercadopago' | null>(null);
 
   // Openpay / Paynet / SPEI
   const [referenciaPaynet, setReferenciaPaynet] = useState<string | null>(null);
@@ -352,6 +352,30 @@ function ReservarContent() {
       const msg = err instanceof Error ? err.message : 'Error al generar transferencia SPEI';
       setError(msg);
     } finally {
+      setPagando(false);
+    }
+  }
+
+  async function pagarConMercadoPago() {
+    if (!reservacionId) return;
+    setPagando(true);
+    setError('');
+    try {
+      const data = await fetchAPI('/api/mercadopago/crear-preferencia', {
+        method: 'POST',
+        body: JSON.stringify({ reservacion_id: reservacionId }),
+      });
+      // Redirigir a MercadoPago Checkout
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else if (data.sandbox_init_point) {
+        window.location.href = data.sandbox_init_point;
+      } else {
+        setError('No se pudo obtener el enlace de pago');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al conectar con MercadoPago';
+      setError(msg);
       setPagando(false);
     }
   }
@@ -1349,8 +1373,8 @@ function ReservarContent() {
 
               <h3 className="font-bold text-center">{t('reservar.pago_elige_metodo')}</h3>
 
-              {/* 3 botones de método */}
-              <div className="grid grid-cols-3 gap-2">
+              {/* 4 botones de método - 2x2 grid */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => { setMetodoPago('credito'); setError(''); }}
@@ -1383,6 +1407,17 @@ function ReservarContent() {
                   }`}
                 >
                   <Landmark className="w-5 h-5 mx-auto" /><br/>{t('reservar.pago_spei')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMetodoPago('mercadopago'); setError(''); }}
+                  className={`p-3 border-2 rounded-xl font-bold transition-all text-xs text-center ${
+                    metodoPago === 'mercadopago'
+                      ? 'border-[#009ee3] bg-[#009ee3]/10 text-[#009ee3]'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  <Smartphone className="w-5 h-5 mx-auto" /><br/>Mercado Pago
                 </button>
               </div>
 
@@ -1459,6 +1494,41 @@ function ReservarContent() {
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <><Landmark className="w-5 h-5" /> {t('reservar.pago_btn_spei')}</>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Formulario: MercadoPago */}
+              {metodoPago === 'mercadopago' && (
+                <div className="border border-[#009ee3]/30 p-5 rounded-xl bg-[#009ee3]/5 space-y-4 text-center animate-fade-in">
+                  <div className="w-16 h-16 bg-[#009ee3]/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="#009ee3">
+                      <path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3l4.23-3.18C19.44 16.83 21 13.91 21 10.5 21 5.81 17.19 2 12.5 2h-1zm.5 14h-1c-3.59 0-6.5-2.91-6.5-6.5S7.41 3 11 3h1c3.59 0 6.5 2.91 6.5 6.5 0 2.63-1.23 4.93-3.19 6.32L12 18.5V16z"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-[#009ee3]">Pagar con Mercado Pago</h3>
+                  <p className="text-sm text-gray-500">
+                    Serás redirigido a Mercado Pago para completar tu pago de forma segura. Acepta tarjetas, transferencia y más.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                    <span>✓ Tarjetas</span>
+                    <span>✓ OXXO</span>
+                    <span>✓ Transferencia</span>
+                    <span>✓ MSI</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={pagarConMercadoPago}
+                    disabled={pagando}
+                    className="w-full bg-[#009ee3] hover:bg-[#007eb5] text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {pagando ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Smartphone className="w-5 h-5" /> Ir a Mercado Pago
+                      </>
                     )}
                   </button>
                 </div>

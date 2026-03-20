@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Copy, Check, MousePointerClick, CalendarCheck, DollarSign, LogOut, Calendar, Clock } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://quinta-ali-frontend.vercel.app';
+const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://laquintadeali.com';
 
 interface Stats {
   clicks_semana: number;
