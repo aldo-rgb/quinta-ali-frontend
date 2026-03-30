@@ -16,6 +16,14 @@ import { Paquete, paquetesFallback } from '@/lib/paquetes';
 import { fetchAPI } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 
+// Tipo para reviews de Google
+interface GoogleReview {
+  nombre: string;
+  rating: number;
+  texto: string;
+  foto: string;
+  fecha: number;
+}
 
 export default function Home() {
   const { t, locale } = useI18n();
@@ -39,6 +47,10 @@ export default function Home() {
   const [amenidadFotos, setAmenidadFotos] = useState<Record<string, string>>({});
   const [areaFotosAll, setAreaFotosAll] = useState<Record<string, string[]>>({});
   const [carouselIdx, setCarouselIdx] = useState<Record<string, number>>({});
+
+  // Reviews state
+  const [googleReviews, setGoogleReviews] = useState<GoogleReview[]>([]);
+  const [reviewsCargando, setReviewsCargando] = useState(true);
 
   // B2B modal state
   const [b2bOpen, setB2bOpen] = useState(false);
@@ -71,6 +83,26 @@ export default function Home() {
         setAreaFotosAll(allPorArea);
       }
     }).catch(() => {});
+
+    // Cargar reviews de Google Maps
+    const loadGoogleReviews = async () => {
+      try {
+        const apiUrl = 'https://web-production-bdf66.up.railway.app';
+        const response = await fetch(`${apiUrl}/api/google-reviews`);
+        const data = await response.json();
+        console.log('Google Reviews Response:', data);
+        if (data && data.reviews && Array.isArray(data.reviews)) {
+          console.log('Setting reviews:', data.reviews.length);
+          setGoogleReviews(data.reviews);
+        }
+      } catch (err) {
+        console.error('Error loading Google Reviews:', err);
+      } finally {
+        setReviewsCargando(false);
+      }
+    };
+
+    loadGoogleReviews();
   }, []);
 
   // Auto-rotate carousels
@@ -110,12 +142,6 @@ export default function Home() {
     { area: 'palapa', labelKey: 'home.galeria_palapa', emoji: '🌴', Icon: TreePine, color: 'from-[#e8edd0] to-[#f2f5e8]' },
     { area: 'juegos', labelKey: 'home.galeria_juegos', emoji: '🎠', Icon: Gamepad2, color: 'from-[#f5ddd4] to-[#faf0eb]' },
   ];
-
-  const testimonios = [1, 2, 3].map((i) => ({
-    nombre: t(`home.testimonio_${i}_nombre`),
-    texto: t(`home.testimonio_${i}_texto`),
-    evento: t(`home.testimonio_${i}_evento`),
-  }));
 
   const testimonioFotos = [
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
@@ -349,34 +375,92 @@ export default function Home() {
 
       {/* ───────── 6. TESTIMONIOS ───────── */}
       <section className="px-6 py-12 max-w-lg mx-auto bg-section-green rounded-[2rem]">
-        <h2 className="text-xl font-bold text-center mb-1">{t('home.testimonios_titulo')}</h2>
+        <h2 className="text-xl font-bold text-center mb-1">{t('home.testimonios_titulo')} 🌟</h2>
         <p className="text-gray-500 text-sm text-center mb-8">{t('home.testimonios_sub')}</p>
         <div className="space-y-4">
-          {testimonios.map((test, i) => (
-            <div key={i} className="bg-white/70 rounded-2xl p-5 border border-primary-light/15 shadow-sm">
-              <div className="flex items-center gap-1 mb-3">
-                {[...Array(5)].map((_, s) => (
-                  <svg key={s} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-sm text-gray-600 italic leading-relaxed">&quot;{test.texto}&quot;</p>
-              <div className="flex items-center gap-3 mt-4">
-                <Image
-                  src={testimonioFotos[i]}
-                  alt={test.nombre}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-semibold text-sm">{test.nombre}</p>
-                  <p className="text-xs text-gray-400">{test.evento}</p>
+          {reviewsCargando ? (
+            <div className="py-12 text-center">
+              <div className="inline-block w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+              <p className="text-sm text-gray-400 mt-2">{t('home.cargando')}</p>
+            </div>
+          ) : googleReviews && googleReviews.length > 0 ? (
+            googleReviews.map((review, i) => (
+              <div key={i} className="bg-white/70 rounded-2xl p-5 border border-primary-light/15 shadow-sm">
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, s) => (
+                    <svg
+                      key={s}
+                      className={`w-4 h-4 ${s < review.rating ? 'text-amber-400' : 'text-gray-300'}`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 italic leading-relaxed">&quot;{review.texto}&quot;</p>
+                <div className="flex items-center gap-3 mt-4">
+                  {review.foto ? (
+                    <Image
+                      src={review.foto}
+                      alt={review.nombre}
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-xs font-bold text-primary">
+                        {review.nombre
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold text-sm">{review.nombre}</p>
+                    <p className="text-xs text-gray-400">De Google Maps</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            // Fallback a testimonios estáticos si no hay reviews de Google
+            [1, 2, 3].map((i) => {
+              const test = {
+                nombre: t(`home.testimonio_${i}_nombre`),
+                texto: t(`home.testimonio_${i}_texto`),
+                evento: t(`home.testimonio_${i}_evento`),
+              };
+              return (
+                <div key={i} className="bg-white/70 rounded-2xl p-5 border border-primary-light/15 shadow-sm">
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(5)].map((_, s) => (
+                      <svg key={s} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-600 italic leading-relaxed">&quot;{test.texto}&quot;</p>
+                  <div className="flex items-center gap-3 mt-4">
+                    <Image
+                      src={testimonioFotos[i - 1]}
+                      alt={test.nombre}
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-sm">{test.nombre}</p>
+                      <p className="text-xs text-gray-400">{test.evento}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 
