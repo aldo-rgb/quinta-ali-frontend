@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Waves, Flame, BedDouble, Target, Droplets, TreePine, Gamepad2,
-  Star, Heart, AlertTriangle, Building2, X, FileText, CheckCircle2
+  Star, Heart, AlertTriangle, Building2, X, FileText, CheckCircle2, Calendar
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Header from '@/components/Header';
@@ -503,7 +503,7 @@ export default function Home() {
             onClick={() => { setB2bOpen(true); setB2bExito(null); setB2bError(''); }}
             className="mt-5 bg-primary hover:bg-primary-dark text-white font-bold px-8 py-3.5 rounded-full text-sm active:scale-[0.98] transition-all shadow-lg shadow-primary/30 inline-flex items-center gap-2"
           >
-            <FileText className="w-4 h-4" />
+            <Calendar className="w-4 h-4" />
             {t('home.b2b_boton')}
           </button>
           <p className="text-gray-500 text-[10px] mt-3">{t('home.b2b_incluye_iva')}</p>
