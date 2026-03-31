@@ -570,8 +570,8 @@ export default function Home() {
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    if (!b2bForm.empresa || !b2bForm.contacto || !b2bForm.email || !b2bForm.fecha_evento) {
-                      setB2bError('Por favor completa todos los campos requeridos (empresa, contacto, email, fecha).');
+                    if (!b2bForm.empresa || !b2bForm.contacto || !b2bForm.email || !b2bForm.fecha_evento || !b2bForm.paquete_base) {
+                      setB2bError('Por favor completa todos los campos requeridos (empresa, contacto, email, fecha y paquete).');
                       return;
                     }
                     setB2bEnviando(true);
@@ -660,8 +660,8 @@ export default function Home() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_paquete')}</label>
-                      <select value={b2bForm.paquete_base} onChange={e => setB2bForm(p => ({ ...p, paquete_base: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary bg-white">
+                      <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_paquete')} *</label>
+                      <select required value={b2bForm.paquete_base} onChange={e => setB2bForm(p => ({ ...p, paquete_base: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary bg-white">
                         <option value="">{t('home.b2b_paquete_placeholder')}</option>
                         {paquetes.map(p => (
                           <option key={p.id} value={p.id}>{p.emoji} {p.nombre} — ${p.precio.toLocaleString('es-MX')}</option>
