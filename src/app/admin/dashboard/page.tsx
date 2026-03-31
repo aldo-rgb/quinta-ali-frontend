@@ -408,6 +408,16 @@ export default function AdminDashboard() {
     }
   }
 
+  async function eliminarReservacion(id: number) {
+    if (!confirm('⚠️ ¿Eliminar esta reservación permanentemente? Esta acción no se puede deshacer.')) return;
+    try {
+      await fetchAPI(`/api/reservaciones/${id}`, { method: 'DELETE' });
+      cargarReservaciones();
+    } catch (err) {
+      console.error('Error eliminando reservación:', err);
+    }
+  }
+
   function handleLogout() {
     sessionStorage.removeItem('admin_token');
     router.replace('/admin');
@@ -895,6 +905,12 @@ export default function AdminDashboard() {
                 </button>
               </div>
               )}
+              {/* Botón de eliminar */}
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                <button onClick={() => eliminarReservacion(res.id)} className="w-full bg-red-100 text-red-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-red-200">
+                  <Trash2 className="w-4 h-4" /> Eliminar reservación
+                </button>
+              </div>
             </div>
           ))
           )}
