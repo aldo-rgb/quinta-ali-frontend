@@ -193,6 +193,8 @@ export default function AdminDashboard() {
   const [cargando, setCargando] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [resExpandida, setResExpandida] = useState<number | null>(null);
+  const [editandoPrecio, setEditandoPrecio] = useState<number | null>(null);
+  const [nuevoPrecio, setNuevoPrecio] = useState('');
 
   // Galería state
   const [fotos, setFotos] = useState<Foto[]>([]);
@@ -438,6 +440,29 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('❌ Error eliminando reservación:', err);
       alert('Error al eliminar la reservación. Por favor intenta de nuevo.');
+    }
+  }
+
+  async function actualizarPrecio(id: number) {
+    const monto = Number(nuevoPrecio);
+    if (isNaN(monto) || monto < 0) {
+      alert('Por favor ingresa un monto válido');
+      return;
+    }
+    try {
+      const response = await fetchAPI(`/api/reservaciones/${id}/precio`, {
+        method: 'PATCH',
+        body: JSON.stringify({ monto_total: monto })
+      });
+      if (response && response.message) {
+        console.log('✅ Precio actualizado:', response.message);
+        setEditandoPrecio(null);
+        setNuevoPrecio('');
+        await cargarReservaciones();
+      }
+    } catch (err) {
+      console.error('❌ Error actualizando precio:', err);
+      alert('Error al actualizar el precio. Por favor intenta de nuevo.');
     }
   }
 
@@ -838,7 +863,19 @@ export default function AdminDashboard() {
                   <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {parseFecha(res.fecha_evento)?.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) || 'Fecha inválida'}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {res.hora_inicio?.slice(0,5)}</span>
                 </div>
-                <span className="font-bold text-primary">${Number(res.monto_total).toLocaleString('es-MX')}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-primary">${Number(res.monto_total).toLocaleString('es-MX')}</span>
+                  <button
+                    onClick={() => {
+                      setEditandoPrecio(res.id);
+                      setNuevoPrecio(String(res.monto_total));
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                    title="Editar precio"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-gray-400 hover:text-primary" />
+                  </button>
+                </div>
               </div>
 
               {/* Detalle expandible */}
@@ -938,6 +975,42 @@ export default function AdminDashboard() {
           ))
           )}
         </div>
+
+        {/* Modal para editar precio */}
+        {editandoPrecio && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-bold mb-4">Editar Precio</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Nuevo Precio ($)</label>
+                  <input
+                    type="number"
+                    value={nuevoPrecio}
+                    onChange={(e) => setNuevoPrecio(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="0.00"
+                    min="0"
+                  />
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => setEditandoPrecio(null)}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => actualizarPrecio(editandoPrecio)}
+                    className="flex-1 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       )}
 
       {/* Hoy tab */}
