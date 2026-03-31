@@ -60,7 +60,7 @@ export default function Home() {
   const [b2bForm, setB2bForm] = useState({
     empresa: '', contacto: '', email: '', telefono: '',
     num_empleados: '', rfc: '', razon_social: '',
-    fecha_evento: '', paquete_base: '', num_asistentes: '50', notas: '',
+    fecha_evento: '', hora_inicio: '15:00', paquete_base: '', num_asistentes: '50', notas: '',
   });
 
   useEffect(() => {
@@ -549,7 +549,7 @@ export default function Home() {
                     type="button"
                     onClick={() => {
                       setB2bExito(null);
-                      setB2bForm({ empresa: '', contacto: '', email: '', telefono: '', num_empleados: '', rfc: '', razon_social: '', fecha_evento: '', paquete_base: '', num_asistentes: '50', notas: '' });
+                      setB2bForm({ empresa: '', contacto: '', email: '', telefono: '', num_empleados: '', rfc: '', razon_social: '', fecha_evento: '', hora_inicio: '15:00', paquete_base: '', num_asistentes: '50', notas: '' });
                     }}
                     className="text-primary font-semibold text-sm"
                   >
@@ -560,7 +560,10 @@ export default function Home() {
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    if (!b2bForm.empresa || !b2bForm.contacto || !b2bForm.email) return;
+                    if (!b2bForm.empresa || !b2bForm.contacto || !b2bForm.email || !b2bForm.fecha_evento) {
+                      setB2bError('Por favor completa todos los campos requeridos (empresa, contacto, email, fecha).');
+                      return;
+                    }
                     setB2bEnviando(true);
                     setB2bError('');
                     try {
@@ -627,12 +630,18 @@ export default function Home() {
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_fecha')}</label>
-                        <input type="date" value={b2bForm.fecha_evento} onChange={e => setB2bForm(p => ({ ...p, fecha_evento: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
+                        <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_fecha')} *</label>
+                        <input type="date" required value={b2bForm.fecha_evento} onChange={e => setB2bForm(p => ({ ...p, fecha_evento: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
                       </div>
                       <div>
+                        <label className="block text-xs font-bold text-gray-500 mb-1.5">⏰ Hora de inicio</label>
+                        <input type="time" value={b2bForm.hora_inicio} onChange={e => setB2bForm(p => ({ ...p, hora_inicio: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
+                      </div>
+                    </div>
+                    <div>
+                      <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_asistentes')}</label>
-                        <input type="number" min="1" value={b2bForm.num_asistentes} onChange={e => setB2bForm(p => ({ ...p, num_asistentes: e.target.value, num_empleados: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
+                        <input type="number" min="1" value={b2bForm.num_asistentes} onChange={e => setB2bForm(p => ({ ...p, num_asistentes: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
                       </div>
                     </div>
                     <div>
