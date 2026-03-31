@@ -138,9 +138,6 @@ function ReservarContent() {
   // Precios dinámicos del mes
   const [preciosMes, setPreciosMes] = useState<Record<string, { precioBase: number; precioFinal: number; tieneDescuento: boolean; porcentajeDescuento: number }>>({});
 
-  // Paquetes dinámicos
-  const [paquetes, setPaquetes] = useState<Paquete[]>(paquetesFallback);
-
   // Cargar extras y paquetes
   useEffect(() => {
     fetchAPI('/api/extras')
@@ -444,11 +441,11 @@ function ReservarContent() {
 
   // Cargar horarios ocupados al seleccionar fecha
   useEffect(() => {
-    if (!form.fecha) { setHorariosOcupados([]); return; }
-    fetchAPI(`/api/reservaciones/disponibilidad?fecha=${form.fecha}`)
+    if (!form.fecha_inicio) { setHorariosOcupados([]); return; }
+    fetchAPI(`/api/reservaciones/disponibilidad?fecha=${form.fecha_inicio}`)
       .then((data) => setHorariosOcupados(data))
       .catch(() => setHorariosOcupados([]));
-  }, [form.fecha]);
+  }, [form.fecha_inicio]);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
@@ -766,7 +763,7 @@ function ReservarContent() {
               <span className="text-2xl">{paqueteSeleccionado.emoji}</span>
               <div>
                 <p className="font-bold text-sm">{paqueteSeleccionado.nombre}</p>
-                <p className="text-xs text-gray-500">{form.fecha} a las {form.hora_inicio}</p>
+                <p className="text-xs text-gray-500">{form.fecha_inicio} a las {form.hora_inicio}</p>
               </div>
             </div>
           )}
@@ -1019,27 +1016,9 @@ function ReservarContent() {
 
           {/* Resumen de total */}
           <div className="bg-section-cream rounded-xl p-4 space-y-2">
-            {precioDelDia?.tieneDescuento && (
-              <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-2 mb-1">
-                <Flame className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-green-700">Oferta de último minuto</p>
-                  <p className="text-[10px] text-green-600">-{precioDelDia.porcentajeDescuento}% de descuento ¡Solo por hoy!</p>
-                </div>
-              </div>
-            )}
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">{t('reservar.paquete')}</span>
-              <div className="text-right">
-                {precioDelDia && precioDelDia.precioFinal !== precioDelDia.precioBase ? (
-                  <>
-                    <span className="text-gray-400 line-through text-xs mr-1">${precioDelDia.precioBase.toLocaleString('es-MX')}</span>
-                    <span className={`font-semibold ${precioDelDia.tieneDescuento ? 'text-green-600' : ''}`}>${precioPaquete.toLocaleString('es-MX')}</span>
-                  </>
-                ) : (
-                  <span className="font-semibold">${precioPaquete.toLocaleString('es-MX')}</span>
-                )}
-              </div>
+              <span className="font-semibold">${precioPaquete.toLocaleString('es-MX')}</span>
             </div>
             {getMontoExtras() > 0 && (
               <div className="flex justify-between text-sm">
@@ -1176,7 +1155,9 @@ function ReservarContent() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">{t('reservar.fecha')}</span>
-                <span className="font-semibold">{form.fecha}</span>
+                <span className="font-semibold">
+                  {esNoche && form.fecha_fin ? `${form.fecha_inicio} → ${form.fecha_fin}` : form.fecha_inicio}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">{t('reservar.hora')}</span>
