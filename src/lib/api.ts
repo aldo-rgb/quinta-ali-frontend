@@ -4,6 +4,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || (
     : 'http://localhost:3001'
 );
 
+// Endpoints que deben usar proxy local en producción
+const PROXY_ENDPOINTS = ['/api/galeria', '/api/google-reviews'];
+
 export async function fetchAPI(endpoint: string, options?: RequestInit) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
@@ -12,7 +15,14 @@ export async function fetchAPI(endpoint: string, options?: RequestInit) {
     if (token) headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  // Si es un endpoint que necesita proxy, usa la ruta local
+  const useProxy = typeof window !== 'undefined' && 
+                   window.location.hostname !== 'localhost' &&
+                   PROXY_ENDPOINTS.some(ep => endpoint.startsWith(ep));
+
+  const url = useProxy ? endpoint : `${API_URL}${endpoint}`;
+
+  const res = await fetch(url, {
     headers,
     ...options,
   });
