@@ -594,8 +594,7 @@ function ReservarContent() {
                   const esRango = isInRange(day);
                   const isPast = isDatePast(day);
                   const info = calendario[dateStr];
-                  const parcial = info && info.disponible && info.reservaciones > 0;
-                  const noDisponible = (info && !info.disponible) || parcial;  // Bloquear si NO está disponible O si está parcialmente ocupado
+                  const noDisponible = info && !info.disponible;
                   const precioDay = preciosMes[dateStr];
                   const precioChanged = precioDay && precioDay.precioFinal !== precioDay.precioBase;
 
@@ -641,10 +640,6 @@ function ReservarContent() {
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-primary" />
                   <span className="text-[10px] text-gray-400">{t('reservar.seleccionado')}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-yellow-300" />
-                  <span className="text-[10px] text-gray-400">{t('reservar.parcial')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500" />
