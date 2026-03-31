@@ -614,7 +614,7 @@ export default function Home() {
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_empleados')}</label>
-                        <input type="text" value={b2bForm.num_empleados} onChange={e => setB2bForm(p => ({ ...p, num_empleados: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" placeholder="50-100" />
+                        <input type="text" value={b2bForm.num_empleados} onChange={e => setB2bForm(p => ({ ...p, num_empleados: e.target.value, num_asistentes: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" placeholder="50-100" />
                       </div>
                     </div>
                     <div>
@@ -632,7 +632,7 @@ export default function Home() {
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_asistentes')}</label>
-                        <input type="number" min="10" max="200" value={b2bForm.num_asistentes} onChange={e => setB2bForm(p => ({ ...p, num_asistentes: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
+                        <input type="number" min="10" max="200" value={b2bForm.num_asistentes} onChange={e => setB2bForm(p => ({ ...p, num_asistentes: e.target.value, num_empleados: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
                       </div>
                     </div>
                     <div>
