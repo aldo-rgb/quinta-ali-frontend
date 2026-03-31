@@ -27,6 +27,22 @@ function adminHeaders(extra?: Record<string, string>): Record<string, string> {
   return h;
 }
 
+// Helper function to parse dates correctly from backend
+function parseFecha(fechaStr: string | undefined | null): Date | null {
+  if (!fechaStr) return null;
+  
+  // Remove time portion if exists (keep only YYYY-MM-DD)
+  const datePart = String(fechaStr).split('T')[0];
+  if (!datePart || datePart === 'Invalid Date') return null;
+  
+  // Parse as YYYY-MM-DD and add noon time to avoid timezone issues
+  const [year, month, day] = datePart.split('-').map(Number);
+  if (!year || !month || !day) return null;
+  
+  // Create date in local timezone to avoid UTC conversion
+  return new Date(year, month - 1, day);
+}
+
 interface Reservacion {
   id: number;
   cliente_nombre: string;
@@ -819,7 +835,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between mt-3 text-sm">
                 <div className="flex items-center gap-3 text-gray-500">
-                  <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(res.fecha_evento + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {parseFecha(res.fecha_evento)?.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) || 'Fecha inválida'}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {res.hora_inicio?.slice(0,5)}</span>
                 </div>
                 <span className="font-bold text-primary">${Number(res.monto_total).toLocaleString('es-MX')}</span>
@@ -2157,7 +2173,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-gray-400">
-                    <span>{lead.fecha_evento ? new Date(lead.fecha_evento + 'T12:00:00').toLocaleDateString('es-MX') : 'Sin fecha'} · {lead.paquete_base || 'Sin paq.'}</span>
+                    <span>{lead.fecha_evento ? (parseFecha(lead.fecha_evento)?.toLocaleDateString('es-MX') || 'Fecha inválida') : 'Sin fecha'} · {lead.paquete_base || 'Sin paq.'}</span>
                     <div className="flex gap-2">
                       {lead.telefono && (
                         <a href={`tel:${lead.telefono}`} className="text-primary font-semibold"><Phone className="w-3.5 h-3.5" /></a>
