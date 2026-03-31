@@ -625,7 +625,7 @@ export default function Home() {
 
                   {/* Evento */}
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_fecha')}</label>
                         <input type="date" value={b2bForm.fecha_evento} onChange={e => setB2bForm(p => ({ ...p, fecha_evento: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary" />
