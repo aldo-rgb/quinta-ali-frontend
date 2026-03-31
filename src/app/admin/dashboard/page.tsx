@@ -975,42 +975,42 @@ export default function AdminDashboard() {
           ))
           )}
         </div>
+      )}
 
-        {/* Modal para editar precio */}
-        {editandoPrecio && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-              <h3 className="text-lg font-bold mb-4">Editar Precio</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Nuevo Precio ($)</label>
-                  <input
-                    type="number"
-                    value={nuevoPrecio}
-                    onChange={(e) => setNuevoPrecio(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="0.00"
-                    min="0"
-                  />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={() => setEditandoPrecio(null)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={() => actualizarPrecio(editandoPrecio)}
-                    className="flex-1 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Guardar
-                  </button>
-                </div>
+      {/* Modal para editar precio */}
+      {editandoPrecio && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-4">Editar Precio</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-semibold mb-1">Nuevo Precio ($)</label>
+                <input
+                  type="number"
+                  value={nuevoPrecio}
+                  onChange={(e) => setNuevoPrecio(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="0.00"
+                  min="0"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setEditandoPrecio(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => actualizarPrecio(editandoPrecio)}
+                  className="flex-1 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Guardar
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
       )}
 
       {/* Hoy tab */}
