@@ -195,6 +195,8 @@ export default function AdminDashboard() {
   const [resExpandida, setResExpandida] = useState<number | null>(null);
   const [editandoPrecio, setEditandoPrecio] = useState<number | null>(null);
   const [nuevoPrecio, setNuevoPrecio] = useState('');
+  const [editandoAnticipo, setEditandoAnticipo] = useState<number | null>(null);
+  const [nuevoAnticipo, setNuevoAnticipo] = useState('');
 
   // Galería state
   const [fotos, setFotos] = useState<Foto[]>([]);
@@ -463,6 +465,37 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('❌ Error actualizando precio:', err);
       alert('Error al actualizar el precio. Por favor intenta de nuevo.');
+    }
+  }
+
+  async function actualizarAnticipo(id: number) {
+    const monto = Number(nuevoAnticipo);
+    const resActual = reservaciones.find((r) => r.id === id);
+    
+    if (isNaN(monto) || monto < 0) {
+      alert('Por favor ingresa un monto válido');
+      return;
+    }
+    
+    if (resActual && monto > resActual.monto_total) {
+      alert(`El anticipo no puede ser mayor al total: $${resActual.monto_total}`);
+      return;
+    }
+    
+    try {
+      const response = await fetchAPI(`/api/reservaciones/${id}/anticipo`, {
+        method: 'PATCH',
+        body: JSON.stringify({ monto_pagado: monto })
+      });
+      if (response && response.message) {
+        console.log('💰 Anticipo registrado:', response.message);
+        setEditandoAnticipo(null);
+        setNuevoAnticipo('');
+        await cargarReservaciones();
+      }
+    } catch (err) {
+      console.error('❌ Error actualizando anticipo:', err);
+      alert('Error al registrar el anticipo. Por favor intenta de nuevo.');
     }
   }
 
@@ -875,6 +908,16 @@ export default function AdminDashboard() {
                   >
                     <Pencil className="w-3.5 h-3.5 text-gray-400 hover:text-primary" />
                   </button>
+                  <button
+                    onClick={() => {
+                      setEditandoAnticipo(res.id);
+                      setNuevoAnticipo(String(res.monto_pagado || 0));
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                    title="Registrar anticipo"
+                  >
+                    <CreditCard className="w-3.5 h-3.5 text-gray-400 hover:text-blue-600" />
+                  </button>
                 </div>
               </div>
 
@@ -1006,6 +1049,52 @@ export default function AdminDashboard() {
                   className="flex-1 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para registrar anticipo */}
+      {editandoAnticipo && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-4">Registrar Anticipo</h3>
+            <div className="space-y-3">
+              {reservaciones.find((r) => r.id === editandoAnticipo) && (
+                <div className="bg-gray-100 p-3 rounded-lg text-sm">
+                  <div className="font-semibold mb-1">
+                    Total: ${reservaciones.find((r) => r.id === editandoAnticipo)?.monto_total || 0}
+                  </div>
+                  <div className="text-gray-600">
+                    Ya pagado: ${reservaciones.find((r) => r.id === editandoAnticipo)?.monto_pagado || 0}
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-semibold mb-1">Monto Pagado ($)</label>
+                <input
+                  type="number"
+                  value={nuevoAnticipo}
+                  onChange={(e) => setNuevoAnticipo(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="0.00"
+                  min="0"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setEditandoAnticipo(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => actualizarAnticipo(editandoAnticipo)}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Registrar
                 </button>
               </div>
             </div>
