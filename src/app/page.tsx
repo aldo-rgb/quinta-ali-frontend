@@ -87,9 +87,7 @@ export default function Home() {
     // Cargar reviews de Google Maps
     const loadGoogleReviews = async () => {
       try {
-        const apiUrl = 'https://web-production-bdf66.up.railway.app';
-        const response = await fetch(`${apiUrl}/api/google-reviews`);
-        const data = await response.json();
+        const data = await fetchAPI('/api/google-reviews');
         console.log('Google Reviews Response:', data);
         if (data && data.reviews && Array.isArray(data.reviews)) {
           console.log('Setting reviews:', data.reviews.length);
