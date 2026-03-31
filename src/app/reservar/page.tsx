@@ -594,8 +594,8 @@ function ReservarContent() {
                   const esRango = isInRange(day);
                   const isPast = isDatePast(day);
                   const info = calendario[dateStr];
-                  const noDisponible = info && !info.disponible;
                   const parcial = info && info.disponible && info.reservaciones > 0;
+                  const noDisponible = (info && !info.disponible) || parcial;  // Bloquear si NO está disponible O si está parcialmente ocupado
                   const precioDay = preciosMes[dateStr];
                   const precioChanged = precioDay && precioDay.precioFinal !== precioDay.precioBase;
 
@@ -614,8 +614,6 @@ function ReservarContent() {
                           ? 'bg-red-200 text-red-700 cursor-not-allowed font-bold'
                           : isPast
                           ? 'text-gray-200 cursor-not-allowed'
-                          : parcial
-                          ? 'bg-yellow-50 text-gray-700 hover:bg-yellow-100 ring-2 ring-yellow-300'
                           : 'hover:bg-primary/10 text-gray-700'
                       }`}
                     >
