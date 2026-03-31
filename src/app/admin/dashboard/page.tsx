@@ -411,10 +411,17 @@ export default function AdminDashboard() {
   async function eliminarReservacion(id: number) {
     if (!confirm('⚠️ ¿Eliminar esta reservación permanentemente? Esta acción no se puede deshacer.')) return;
     try {
-      await fetchAPI(`/api/reservaciones/${id}`, { method: 'DELETE' });
-      cargarReservaciones();
+      const response = await fetchAPI(`/api/reservaciones/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (response && response.message) {
+        console.log('✅ Reservación eliminada:', response.message);
+      }
+      await cargarReservaciones();
     } catch (err) {
-      console.error('Error eliminando reservación:', err);
+      console.error('❌ Error eliminando reservación:', err);
+      alert('Error al eliminar la reservación. Por favor intenta de nuevo.');
     }
   }
 

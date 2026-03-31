@@ -15,6 +15,11 @@ export async function fetchAPI(endpoint: string, options?: RequestInit) {
     if (token) headers['Authorization'] = `Bearer ${token}`;
   }
 
+  // Merge headers from options if present
+  if (options?.headers) {
+    Object.assign(headers, options.headers);
+  }
+
   // Si es un endpoint que necesita proxy, usa la ruta local
   const useProxy = typeof window !== 'undefined' && 
                    window.location.hostname !== 'localhost' &&
@@ -23,8 +28,8 @@ export async function fetchAPI(endpoint: string, options?: RequestInit) {
   const url = useProxy ? endpoint : `${API_URL}${endpoint}`;
 
   const res = await fetch(url, {
-    headers,
     ...options,
+    headers,
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Error del servidor' }));
