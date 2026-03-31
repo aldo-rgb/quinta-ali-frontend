@@ -55,7 +55,7 @@ export default function Home() {
   // B2B modal state
   const [b2bOpen, setB2bOpen] = useState(false);
   const [b2bEnviando, setB2bEnviando] = useState(false);
-  const [b2bExito, setB2bExito] = useState<{ folio: string; total: number } | null>(null);
+  const [b2bExito, setB2bExito] = useState<{ folio: string; total: number; reservacion_id?: number; fecha_evento?: string } | null>(null);
   const [b2bError, setB2bError] = useState('');
   const [b2bForm, setB2bForm] = useState({
     empresa: '', contacto: '', email: '', telefono: '',
@@ -532,28 +532,38 @@ export default function Home() {
               {b2bExito ? (
                 <div className="text-center space-y-4 py-6">
                   <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
-                  <h3 className="font-bold text-xl text-green-800">{t('home.b2b_exito_titulo')}</h3>
-                  <p className="text-gray-500 text-sm">{t('home.b2b_exito_desc')}</p>
-                  <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                  <div>
+                    <h3 className="font-bold text-xl text-green-800">¡Reservación Confirmada!</h3>
+                    <p className="text-gray-500 text-xs mt-1">Se creó una reservación en el sistema y se envió factura por email</p>
+                  </div>
+                  <div className="bg-green-50 rounded-xl p-4 space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">{t('home.b2b_exito_folio')}</span>
+                      <span className="text-gray-600">Reservación #</span>
+                      <span className="font-bold text-green-700">{b2bExito.reservacion_id || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Factura</span>
                       <span className="font-bold text-gray-900">{b2bExito.folio}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">{t('home.b2b_exito_total')}</span>
-                      <span className="font-bold text-primary">${b2bExito.total.toLocaleString('es-MX')} MXN</span>
+                      <span className="text-gray-600">Fecha evento</span>
+                      <span className="font-bold text-gray-900">{b2bExito.fecha_evento ? new Date(b2bExito.fecha_evento).toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-2 border-t border-green-200">
+                      <span className="text-gray-600 font-semibold">Total con IVA</span>
+                      <span className="font-bold text-green-700">${b2bExito.total.toLocaleString('es-MX')} MXN</span>
                     </div>
                   </div>
-                  <p className="text-red-600 text-xs font-bold">{t('home.b2b_vigencia')}</p>
+                  <p className="text-amber-700 text-xs bg-amber-50 p-2 rounded">📅 Vigencia: 5 días hábiles. Sujeto a disponibilidad.</p>
                   <button
                     type="button"
                     onClick={() => {
                       setB2bExito(null);
                       setB2bForm({ empresa: '', contacto: '', email: '', telefono: '', num_empleados: '', rfc: '', razon_social: '', fecha_evento: '', hora_inicio: '15:00', paquete_base: '', num_asistentes: '50', notas: '' });
                     }}
-                    className="text-primary font-semibold text-sm"
+                    className="text-primary font-semibold text-sm hover:text-primary/80"
                   >
-                    {t('home.b2b_nueva')}
+                    ➕ Nueva reservación
                   </button>
                 </div>
               ) : (
@@ -574,7 +584,12 @@ export default function Home() {
                         body: JSON.stringify(b2bForm),
                       }).then(r => r.json());
                       if (result.ok) {
-                        setB2bExito({ folio: result.folio, total: result.total });
+                        setB2bExito({ 
+                          folio: result.folio, 
+                          total: result.total,
+                          reservacion_id: result.reservacion_id,
+                          fecha_evento: b2bForm.fecha_evento
+                        });
                       } else {
                         setB2bError(result.message || 'Error al generar cotización');
                       }
