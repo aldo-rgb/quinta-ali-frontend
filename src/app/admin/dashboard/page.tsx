@@ -197,6 +197,7 @@ export default function AdminDashboard() {
   const [nuevoPrecio, setNuevoPrecio] = useState('');
   const [editandoAnticipo, setEditandoAnticipo] = useState<number | null>(null);
   const [nuevoAnticipo, setNuevoAnticipo] = useState('');
+  const [busquedaReservaciones, setBusquedaReservaciones] = useState('');
 
   // Galería state
   const [fotos, setFotos] = useState<Foto[]>([]);
@@ -868,6 +869,17 @@ export default function AdminDashboard() {
       {/* Reservaciones tab */}
       {activeTab === 'reservaciones' && (
         <div className="px-4 mt-4 max-w-lg mx-auto space-y-3">
+          {/* Search bar */}
+          <div className="sticky top-14 z-20 bg-background pt-2 pb-3">
+            <input
+              type="text"
+              placeholder="🔍 Buscar por nombre, email, teléfono..."
+              value={busquedaReservaciones}
+              onChange={(e) => setBusquedaReservaciones(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            />
+          </div>
+
           {cargando ? (
             <div className="text-center py-8 text-gray-400">Cargando...</div>
           ) : reservaciones.length === 0 ? (
@@ -876,8 +888,29 @@ export default function AdminDashboard() {
               <p className="font-bold mt-3">Sin reservaciones</p>
               <p className="text-sm text-gray-400 mt-1">Las nuevas reservaciones aparecerán aquí</p>
             </div>
-          ) : (
-            reservaciones.map((res) => (
+          ) : (() => {
+            const filtradas = reservaciones.filter((res) => {
+              const busqueda = busquedaReservaciones.toLowerCase();
+              return (
+                res.cliente_nombre.toLowerCase().includes(busqueda) ||
+                res.cliente_apellido.toLowerCase().includes(busqueda) ||
+                res.cliente_email.toLowerCase().includes(busqueda) ||
+                (res.cliente_telefono || '').includes(busqueda) ||
+                res.paquete_nombre.toLowerCase().includes(busqueda)
+              );
+            });
+            
+            if (filtradas.length === 0) {
+              return (
+                <div className="bg-white/70 rounded-xl border border-primary-light/15 p-8 text-center">
+                  <ClipboardList className="w-10 h-10 text-primary/30 mx-auto" />
+                  <p className="font-bold mt-3">No se encontraron resultados</p>
+                  <p className="text-sm text-gray-400 mt-1">Intenta con otro término de búsqueda</p>
+                </div>
+              );
+            }
+            
+            return filtradas.map((res) => (
             <div key={res.id} className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
               <div className="flex items-start justify-between cursor-pointer" onClick={() => setResExpandida(resExpandida === res.id ? null : res.id)}>
                 <div>
@@ -1015,8 +1048,8 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-          ))
-          )}
+            ));
+          })()}
         </div>
       )}
 
