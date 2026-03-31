@@ -819,7 +819,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center justify-between mt-3 text-sm">
                 <div className="flex items-center gap-3 text-gray-500">
-                  <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(res.fecha_evento).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(res.fecha_evento + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {res.hora_inicio?.slice(0,5)}</span>
                 </div>
                 <span className="font-bold text-primary">${Number(res.monto_total).toLocaleString('es-MX')}</span>
