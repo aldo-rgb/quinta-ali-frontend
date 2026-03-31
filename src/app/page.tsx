@@ -21,6 +21,8 @@ interface GoogleReview {
   nombre: string;
   rating: number;
   texto: string;
+  texto_en?: string;
+  texto_es?: string;
   foto: string;
   fecha: number;
 }
@@ -396,7 +398,9 @@ export default function Home() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 italic leading-relaxed">&quot;{review.texto}&quot;</p>
+                <p className="text-sm text-gray-600 italic leading-relaxed">
+                  {locale === 'es' ? (review.texto_es || review.texto) : (review.texto_en || review.texto)}
+                </p>
                 <div className="flex items-center gap-3 mt-4">
                   {review.foto ? (
                     <Image
