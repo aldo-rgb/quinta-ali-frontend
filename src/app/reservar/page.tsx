@@ -10,7 +10,7 @@ import { fetchAPI } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import {
   Check, Flame, DollarSign, Gift, KeyRound, Clock, Copy, Lightbulb,
-  Landmark, Store, CreditCard, Smartphone
+  Landmark, Store, CreditCard, Smartphone, Calendar
 } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 
@@ -48,7 +48,8 @@ function ReservarContent() {
     nombre: '',
     telefono: '',
     email: '',
-    fecha: '',
+    fecha_inicio: '',
+    fecha_fin: '',
     hora_inicio: '15:00',
     num_invitados: '',
     notas: '',
@@ -78,6 +79,17 @@ function ReservarContent() {
     if (promotorGuardado) {
       setForm((prev) => ({ ...prev, promotor: prev.promotor || promotorGuardado }));
     }
+  }, []);
+
+  // Cargar paquetes disponibles
+  useEffect(() => {
+    fetchAPI('/api/paquetes')
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPaquetes(data.map((p: Paquete) => ({ ...p, precio: Number(p.precio) })));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const [loading, setLoading] = useState(false);
@@ -117,6 +129,11 @@ function ReservarContent() {
   const [calendario, setCalendario] = useState<Record<string, { reservaciones: number; disponible: boolean }>>({});
   const [horariosOcupados, setHorariosOcupados] = useState<{ hora_inicio: string; hora_fin: string; paquete_id: number }[]>([]);
   const [firmaGuardada, setFirmaGuardada] = useState(false);
+  const [paquetes, setPaquetes] = useState<Paquete[]>(paquetesFallback);
+
+  // Detectar tipo de paquete actual
+  const paqueteActual = paquetes.find(p => String(p.id) === form.paquete_id);
+  const esNoche = paqueteActual?.tipo_duracion === 'noche';
 
   // Precios dinámicos del mes
   const [preciosMes, setPreciosMes] = useState<Record<string, { precioBase: number; precioFinal: number; tieneDescuento: boolean; porcentajeDescuento: number }>>({});
@@ -178,9 +195,31 @@ function ReservarContent() {
     return total;
   }
 
-  // Precio dinámico del día seleccionado
-  const precioDelDia = form.fecha && preciosMes[form.fecha] ? preciosMes[form.fecha] : null;
-  const precioPaquete = precioDelDia ? precioDelDia.precioFinal : (paqueteSeleccionado?.precio || 0);
+  // Precio dinámico del día seleccionado o rango de noches
+  function calcularPrecioPaquete(): number {
+    if (esNoche && form.fecha_inicio && form.fecha_fin) {
+      // Para paquetes de noche: sumar precios de cada día en el rango
+      let totalPrecio = 0;
+      const inicio = new Date(form.fecha_inicio);
+      const fin = new Date(form.fecha_fin);
+      let fechaActual = new Date(inicio);
+      
+      while (fechaActual <= fin) {
+        const dateStr = fechaActual.toISOString().split('T')[0];
+        const precioDelDia = preciosMes[dateStr];
+        totalPrecio += precioDelDia ? precioDelDia.precioFinal : (paqueteSeleccionado?.precio || 0);
+        fechaActual.setDate(fechaActual.getDate() + 1);
+      }
+      return totalPrecio;
+    } else if (form.fecha_inicio) {
+      // Para paquetes de horas: precio del día único
+      const precioDelDia = preciosMes[form.fecha_inicio];
+      return precioDelDia ? precioDelDia.precioFinal : (paqueteSeleccionado?.precio || 0);
+    }
+    return paqueteSeleccionado?.precio || 0;
+  }
+
+  const precioPaquete = calcularPrecioPaquete();
 
   function getMontoTotal() {
     return precioPaquete + getMontoExtras();
@@ -236,7 +275,8 @@ function ReservarContent() {
           google_id: googleId || undefined,
           es_invitado: esInvitado || !session,
           paquete_id: Number(form.paquete_id),
-          fecha_evento: form.fecha,
+          fecha_evento: form.fecha_inicio,
+          fecha_fin: form.fecha_fin || undefined,
           hora_inicio: form.hora_inicio,
           num_invitados: form.num_invitados ? Number(form.num_invitados) : undefined,
           notas: form.notas || undefined,
@@ -426,7 +466,47 @@ function ReservarContent() {
   }
   function selectDate(day: number) {
     const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    updateField('fecha', dateStr);
+    
+    if (esNoche) {
+      // Para paquetes de noche: permitir rango
+      if (!form.fecha_inicio) {
+        updateField('fecha_inicio', dateStr);
+        updateField('fecha_fin', '');
+      } else if (!form.fecha_fin) {
+        if (dateStr > form.fecha_inicio) {
+          updateField('fecha_fin', dateStr);
+        } else if (dateStr < form.fecha_inicio) {
+          updateField('fecha_fin', form.fecha_inicio);
+          updateField('fecha_inicio', dateStr);
+        } else {
+          updateField('fecha_inicio', '');
+          updateField('fecha_fin', '');
+        }
+      } else {
+        updateField('fecha_inicio', dateStr);
+        updateField('fecha_fin', '');
+      }
+    } else {
+      // Para paquetes de horas: solo un día
+      updateField('fecha_inicio', dateStr);
+      updateField('fecha_fin', '');
+    }
+  }
+
+  // Función para verificar si una fecha está dentro del rango
+  function isInRange(day: number): boolean {
+    if (!form.fecha_inicio || !form.fecha_fin) return false;
+    const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return dateStr >= form.fecha_inicio && dateStr <= form.fecha_fin;
+  }
+
+  // Función para calcular número de noches
+  function calcularNoches(): number {
+    if (!form.fecha_inicio || !form.fecha_fin) return 0;
+    const inicio = new Date(form.fecha_inicio);
+    const fin = new Date(form.fecha_fin);
+    const diferencia = fin.getTime() - inicio.getTime();
+    return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
   }
   function isDatePast(day: number) {
     const date = new Date(viewYear, viewMonth, day);
@@ -512,7 +592,9 @@ function ReservarContent() {
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1;
                   const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                  const isSelected = form.fecha === dateStr;
+                  const isInicio = form.fecha_inicio === dateStr;
+                  const isFin = form.fecha_fin === dateStr;
+                  const esRango = isInRange(day);
                   const isPast = isDatePast(day);
                   const info = calendario[dateStr];
                   const noDisponible = info && !info.disponible;
@@ -527,8 +609,10 @@ function ReservarContent() {
                       disabled={isPast || noDisponible}
                       onClick={() => selectDate(day)}
                       className={`w-full aspect-square mx-auto rounded-xl text-sm font-medium transition-all active:scale-90 relative flex flex-col items-center justify-center ${
-                        isSelected
+                        isInicio || isFin
                           ? 'bg-primary text-white'
+                          : esRango
+                          ? 'bg-primary/20 text-gray-700'
                           : noDisponible
                           ? 'bg-red-100 text-red-300 cursor-not-allowed'
                           : isPast
@@ -541,7 +625,8 @@ function ReservarContent() {
                       <span>{day}</span>
                       {precioDay && !isPast && !noDisponible && form.paquete_id && (
                         <span className={`text-[7px] leading-tight font-bold ${
-                          isSelected ? 'text-white/80' :
+                          isInicio || isFin ? 'text-white' :
+                          esRango ? 'text-primary' :
                           precioDay.tieneDescuento ? 'text-green-600' :
                           precioChanged ? 'text-orange-500' : 'text-gray-400'
                         }`}>
@@ -575,7 +660,7 @@ function ReservarContent() {
           </div>
 
           {/* Horarios ocupados del día seleccionado */}
-          {form.fecha && horariosOcupados.length > 0 && (
+          {form.fecha_inicio && calcularNoches() === 0 && horariosOcupados.length > 0 && (
             <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-4">
               <p className="text-sm font-semibold text-yellow-800 mb-2">⚠️ {t('reservar.horarios_reservados')}</p>
               <div className="space-y-1">
@@ -593,37 +678,60 @@ function ReservarContent() {
             </div>
           )}
 
-          {form.fecha && horariosOcupados.length === 0 && (
+          {form.fecha_inicio && calcularNoches() === 0 && horariosOcupados.length === 0 && (
             <div className="bg-green-50 rounded-xl border border-green-200 p-3 flex items-center gap-2">
               <Check className="w-5 h-5 text-green-600" />
               <p className="text-sm text-green-700 font-medium">{t('reservar.dia_libre')}</p>
             </div>
           )}
 
-          {/* Precio dinámico del día */}
-          {form.fecha && precioDelDia && paqueteSeleccionado && (
-            <div className={`rounded-xl border p-3 flex items-center gap-3 ${precioDelDia.tieneDescuento ? 'bg-green-50 border-green-200' : precioDelDia.precioFinal !== precioDelDia.precioBase ? 'bg-orange-50 border-orange-200' : 'bg-white/70 border-primary-light/20'}`}>
-              {precioDelDia.tieneDescuento ? <Flame className="w-5 h-5 text-green-600" /> : <DollarSign className="w-5 h-5 text-primary" />}
-              <div className="flex-1">
-                {precioDelDia.tieneDescuento ? (
-                  <>
-                    <p className="text-sm font-bold text-green-700">¡Oferta de último minuto!</p>
-                    <p className="text-xs text-green-600">
-                      <span className="line-through text-gray-400">${precioDelDia.precioBase.toLocaleString('es-MX')}</span>
-                      {' → '}
-                      <span className="font-extrabold">${precioDelDia.precioFinal.toLocaleString('es-MX')} MXN</span>
-                      <span className="ml-1">(-{precioDelDia.porcentajeDescuento}%)</span>
+          {/* Resumen de fechas seleccionadas */}
+          {form.fecha_inicio && (
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                <div className="flex-1">
+                  {esNoche && form.fecha_fin ? (
+                    <>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {new Date(form.fecha_inicio).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })} — {new Date(form.fecha_fin).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}
+                      </p>
+                      <p className="text-xs text-primary font-bold">{calcularNoches()} {calcularNoches() === 1 ? 'noche' : 'noches'}</p>
+                    </>
+                  ) : (
+                    <p className="text-sm font-semibold text-gray-700">
+                      {new Date(form.fecha_inicio).toLocaleDateString('es-MX', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </p>
-                  </>
-                ) : precioDelDia.precioFinal !== precioDelDia.precioBase ? (
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Precio dinámico del día/rango */}
+          {form.fecha_inicio && paqueteSeleccionado && (
+            <div className={`rounded-xl border p-3 flex items-center gap-3 ${
+              esNoche && form.fecha_fin && calcularNoches() > 1
+                ? 'bg-blue-50 border-blue-200'
+                : precioPaquete > (paqueteSeleccionado?.precio || 0)
+                ? 'bg-orange-50 border-orange-200'
+                : 'bg-white/70 border-primary-light/20'
+            }`}>
+              <DollarSign className={`w-5 h-5 ${
+                esNoche && form.fecha_fin && calcularNoches() > 1
+                  ? 'text-blue-600'
+                  : 'text-primary'
+              }`} />
+              <div className="flex-1">
+                {esNoche && form.fecha_fin && calcularNoches() > 1 ? (
                   <>
-                    <p className="text-sm font-semibold text-gray-700">Precio para esta fecha</p>
-                    <p className="text-xs font-bold text-primary">${precioDelDia.precioFinal.toLocaleString('es-MX')} MXN</p>
+                    <p className="text-sm font-semibold text-gray-700">Total por {calcularNoches()} noches</p>
+                    <p className="text-xs font-bold text-blue-600">${precioPaquete.toLocaleString('es-MX')} MXN</p>
                   </>
                 ) : (
                   <>
                     <p className="text-sm font-semibold text-gray-700">Precio</p>
-                    <p className="text-xs font-bold text-primary">${precioDelDia.precioFinal.toLocaleString('es-MX')} MXN</p>
+                    <p className="text-xs font-bold text-primary">${precioPaquete.toLocaleString('es-MX')} MXN</p>
                   </>
                 )}
               </div>
@@ -642,7 +750,7 @@ function ReservarContent() {
           <button
             type="button"
             onClick={() => setStep(2)}
-            disabled={!form.paquete_id || !form.fecha}
+            disabled={!form.paquete_id || !form.fecha_inicio}
             className="w-full bg-primary text-white font-bold py-4 rounded-full text-base active:scale-95 transition-transform disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {t('reservar.continuar')}
