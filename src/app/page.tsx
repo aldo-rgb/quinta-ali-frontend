@@ -565,11 +565,11 @@ export default function Home() {
                 <div className="text-center space-y-4 py-6">
                   <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
                   <div>
-                    <h3 className="font-bold text-xl text-green-800">¡Reservación Confirmada!</h3>
+                    <h3 className="font-bold text-xl text-green-800">✅ ¡Reservación Confirmada!</h3>
                     {b2bExito.emailEnviado ? (
-                      <p className="text-gray-500 text-xs mt-1">Se creó una reservación en el sistema. Factura enviada a tu correo</p>
+                      <p className="text-gray-500 text-xs mt-1">📧 Factura enviada a tu correo</p>
                     ) : (
-                      <p className="text-amber-600 text-xs mt-1">✓ Reservación creada. Descarga tu factura abajo</p>
+                      <p className="text-amber-600 text-xs mt-1">💾 Usa el botón abajo para descargar</p>
                     )}
                   </div>
                   <div className="bg-green-50 rounded-xl p-4 space-y-3">
