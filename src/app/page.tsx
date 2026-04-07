@@ -57,6 +57,7 @@ export default function Home() {
   // B2B modal state
   const [b2bOpen, setB2bOpen] = useState(false);
   const [b2bEnviando, setB2bEnviando] = useState(false);
+  const [b2bPagando, setB2bPagando] = useState(false);
   const [b2bExito, setB2bExito] = useState<{ folio: string; total: number; reservacion_id?: number; fecha_evento?: string } | null>(null);
   const [b2bError, setB2bError] = useState('');
   const [b2bForm, setB2bForm] = useState({
@@ -153,6 +154,29 @@ export default function Home() {
     q: t(`home.faq_${i}_q`),
     a: t(`home.faq_${i}_a`),
   }));
+
+  // Función para iniciar pago B2B con MercadoPago
+  const irAlPagoB2B = async () => {
+    if (!b2bExito?.reservacion_id) return;
+    
+    setB2bPagando(true);
+    try {
+      const result = await fetchAPI('/api/mercadopago/crear-preferencia', {
+        method: 'POST',
+        body: JSON.stringify({ reservacion_id: b2bExito.reservacion_id }),
+      });
+
+      if (result && result.payment_url) {
+        window.location.href = result.payment_url;
+      } else {
+        setB2bError('No se pudo iniciar el pago. Intenta de nuevo.');
+      }
+    } catch (err: any) {
+      setB2bError(err.message || 'Error al procesar el pago.');
+    } finally {
+      setB2bPagando(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pb-20 bg-background">
@@ -563,16 +587,35 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-amber-700 text-xs bg-amber-50 p-2 rounded">📅 Vigencia: 5 días hábiles. Sujeto a disponibilidad.</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setB2bExito(null);
-                      setB2bForm({ empresa: '', contacto: '', email: '', telefono: '', num_empleados: '', rfc: '', razon_social: '', fecha_evento: '', hora_inicio: '15:00', paquete_base: '', num_asistentes: '50', notas: '' });
-                    }}
-                    className="text-primary font-semibold text-sm hover:text-primary/80"
-                  >
-                    ➕ Nueva reservación
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={irAlPagoB2B}
+                      disabled={b2bPagando}
+                      className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {b2bPagando ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          💳 Continuar al Pago
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setB2bExito(null);
+                        setB2bForm({ empresa: '', contacto: '', email: '', telefono: '', num_empleados: '', rfc: '', razon_social: '', fecha_evento: '', hora_inicio: '15:00', paquete_base: '', num_asistentes: '50', notas: '' });
+                      }}
+                      className="text-primary font-semibold text-sm hover:text-primary/80"
+                    >
+                      ➕ Nueva reservación
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form
