@@ -399,7 +399,11 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-sm text-gray-600 italic leading-relaxed">
-                  {locale === 'es' ? (review.texto_es || review.texto) : (review.texto_en || review.texto)}
+                  {locale === 'es'
+                    ? review.texto_es && review.texto_es !== review.texto_en
+                      ? review.texto_es
+                      : review.texto_en
+                    : review.texto_en}
                 </p>
                 <div className="flex items-center gap-3 mt-4">
                   {review.foto ? (
