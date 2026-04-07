@@ -566,7 +566,11 @@ export default function Home() {
                   <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
                   <div>
                     <h3 className="font-bold text-xl text-green-800">¡Reservación Confirmada!</h3>
-                    <p className="text-gray-500 text-xs mt-1">Se creó una reservación en el sistema y se envió factura por email</p>
+                    {b2bExito.emailEnviado ? (
+                      <p className="text-gray-500 text-xs mt-1">Se creó una reservación en el sistema. Factura enviada a tu correo</p>
+                    ) : (
+                      <p className="text-amber-600 text-xs mt-1">✓ Reservación creada. Descarga tu factura abajo</p>
+                    )}
                   </div>
                   <div className="bg-green-50 rounded-xl p-4 space-y-3">
                     <div className="flex justify-between text-sm">
@@ -588,6 +592,15 @@ export default function Home() {
                   </div>
                   <p className="text-amber-700 text-xs bg-amber-50 p-2 rounded">📅 Vigencia: 5 días hábiles. Sujeto a disponibilidad.</p>
                   <div className="flex flex-col gap-2">
+                    {!b2bExito.emailEnviado && (
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${b2bExito.pdfUrl}`}
+                        download
+                        className="w-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-3 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                      >
+                        📥 Descargar Factura
+                      </a>
+                    )}
                     <button
                       type="button"
                       onClick={irAlPagoB2B}
@@ -639,7 +652,9 @@ export default function Home() {
                           folio: result.folio, 
                           total: result.total,
                           reservacion_id: result.reservacion_id,
-                          fecha_evento: b2bForm.fecha_evento
+                          fecha_evento: b2bForm.fecha_evento,
+                          emailEnviado: result.emailEnviado,
+                          pdfUrl: result.pdfUrl
                         });
                       } else {
                         setB2bError(result.message || 'Error al generar cotización');
