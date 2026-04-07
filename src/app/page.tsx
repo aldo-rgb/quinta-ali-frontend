@@ -592,13 +592,13 @@ export default function Home() {
                   </div>
                   <p className="text-amber-700 text-xs bg-amber-50 p-2 rounded">📅 Vigencia: 5 días hábiles. Sujeto a disponibilidad.</p>
                   <div className="flex flex-col gap-2">
-                    {!b2bExito.emailEnviado && (
+                    {!b2bExito.emailEnviado && b2bExito.pdfUrl && (
                       <a
                         href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${b2bExito.pdfUrl}`}
                         download
                         className="w-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-3 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                       >
-                        📥 Descargar Factura
+                        📥 Descargar Factura PDF
                       </a>
                     )}
                     <button
