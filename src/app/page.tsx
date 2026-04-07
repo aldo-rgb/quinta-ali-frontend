@@ -676,6 +676,32 @@ export default function Home() {
                         ))}
                       </select>
                     </div>
+
+                    {/* Desglose de precio e IVA */}
+                    {b2bForm.paquete_base && (() => {
+                      const paqueteSeleccionado = paquetes.find(p => p.id.toString() === b2bForm.paquete_base);
+                      if (!paqueteSeleccionado) return null;
+                      const subtotal = paqueteSeleccionado.precio;
+                      const iva = subtotal * 0.16;
+                      const total = subtotal + iva;
+                      return (
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Subtotal:</span>
+                            <span className="font-medium">${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                          </div>
+                          <div className="flex justify-between text-sm border-t border-gray-300 pt-2">
+                            <span className="text-gray-600">IVA 16%:</span>
+                            <span className="font-medium text-primary">${iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                          </div>
+                          <div className="flex justify-between text-base font-bold border-t border-gray-300 pt-2">
+                            <span>Total:</span>
+                            <span className="text-primary">${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    
                     <div>
                       <label className="block text-xs font-bold text-gray-500 mb-1.5">{t('home.b2b_notas')}</label>
                       <textarea rows={2} value={b2bForm.notas} onChange={e => setB2bForm(p => ({ ...p, notas: e.target.value }))} className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-primary focus:border-primary resize-none" placeholder="Ej. Necesitamos servicio de catering, DJ, etc." />
