@@ -739,30 +739,16 @@ export default function Home() {
                     {b2bForm.paquete_base && (() => {
                       const paqueteSeleccionado = paquetes.find(p => p.id.toString() === b2bForm.paquete_base);
                       if (!paqueteSeleccionado) return null;
-                      const precioBase = paqueteSeleccionado.precio;
-                      const numAsistentes = Number(b2bForm.num_asistentes) || 50;
-                      const extraPorAsistente = 150; // Debe coincidir con backend
-                      const extrasTotal = numAsistentes * extraPorAsistente;
-                      const subtotal = precioBase + extrasTotal;
+                      const subtotal = paqueteSeleccionado.precio;
                       const iva = Math.round(subtotal * 0.16 * 100) / 100;
                       const total = subtotal + iva;
                       return (
                         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Paquete base:</span>
-                            <span className="font-medium">${precioBase.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
-                          </div>
-                          {extrasTotal > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Extras ({numAsistentes} × $150):</span>
-                              <span className="font-medium text-amber-600">${extrasTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between text-sm border-t border-gray-300 pt-2">
-                            <span className="text-gray-600 font-medium">Subtotal:</span>
+                            <span className="text-gray-600">Paquete (hasta 100 invitados):</span>
                             <span className="font-medium">${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                           </div>
-                          <div className="flex justify-between text-sm">
+                          <div className="flex justify-between text-sm border-t border-gray-300 pt-2">
                             <span className="text-gray-600">IVA 16%:</span>
                             <span className="font-medium text-primary">${iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                           </div>
