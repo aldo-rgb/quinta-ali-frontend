@@ -1,5 +1,6 @@
-const CACHE_NAME = 'quinta-ali-v1';
+const CACHE_NAME = 'quinta-ali-v2';
 const OFFLINE_URL = '/offline';
+const API_ROUTES = ['/api/', '/api/galeria', '/api/google-reviews'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -18,6 +19,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Don't cache API requests - always fetch fresh
+  const isAPIRequest = API_ROUTES.some(route => event.request.url.includes(route));
+  
+  if (isAPIRequest) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/'))
