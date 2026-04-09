@@ -27,8 +27,12 @@ export default function GalleryModal({ area, label, emoji, onClose }: GalleryMod
   const [current, setCurrent] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchAPI(`/api/galeria/${area}`)
-      .then((data) => setFotos(data))
+    fetchAPI('/api/galeria')
+      .then((data) => {
+        // Filter by area client-side since backend doesn't support /api/galeria/{area}
+        const filtered = data.filter((f: Foto) => f.area === area);
+        setFotos(filtered);
+      })
       .catch(() => setFotos([]))
       .finally(() => setCargando(false));
   }, [area]);
