@@ -58,7 +58,7 @@ export default function Home() {
   const [b2bOpen, setB2bOpen] = useState(false);
   const [b2bEnviando, setB2bEnviando] = useState(false);
   const [b2bPagando, setB2bPagando] = useState(false);
-  const [b2bExito, setB2bExito] = useState<{ folio: string; total: number; reservacion_id?: number; fecha_evento?: string } | null>(null);
+  const [b2bExito, setB2bExito] = useState<{ folio: string; total: number; reservacion_id?: number; fecha_evento?: string; emailEnviado?: boolean; pdfUrl?: string } | null>(null);
   const [b2bError, setB2bError] = useState('');
   const [b2bForm, setB2bForm] = useState({
     empresa: '', contacto: '', email: '', telefono: '',
