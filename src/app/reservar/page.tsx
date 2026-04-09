@@ -305,16 +305,7 @@ function ReservarContent() {
         }
       }
 
-      // Generar código PIN de acceso
-      try {
-        const pinData = await fetchAPI('/api/cerraduras/generar', {
-          method: 'POST',
-          body: JSON.stringify({ reservacion_id: resId }),
-        });
-        setCodigoPin(pinData.codigo_pin);
-      } catch {
-        // No bloquear si falla el PIN
-      }
+      // PIN se generará automáticamente después del pago (webhook)
 
       setExito(true);
       setStep(6);
@@ -1211,19 +1202,19 @@ function ReservarContent() {
             </p>
           </div>
 
-          {/* Código PIN de acceso */}
-          {codigoPin && (
-            <div className="bg-gray-900 text-white rounded-2xl p-4 space-y-2">
-              <div className="flex items-center justify-center gap-2">
-                <KeyRound className="w-5 h-5" />
-                <p className="font-bold text-sm">{t('reservar.codigo_acceso')}</p>
-              </div>
-              <p className="text-3xl font-mono font-extrabold tracking-[0.3em] text-accent text-center">
-                {codigoPin}
-              </p>
-              <p className="text-xs text-gray-400 text-center">{t('reservar.pin_desc')}</p>
+          {/* Código PIN de acceso - Se recibirá por WhatsApp después del pago */}
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <KeyRound className="w-5 h-5 text-orange-600" />
+              <p className="font-bold text-sm text-orange-900">{t('reservar.codigo_acceso')}</p>
             </div>
-          )}
+            <p className="text-sm text-orange-700 text-center leading-relaxed">
+              🔒 Recibirás tu <strong>código PIN de acceso</strong> por WhatsApp inmediatamente después de completar el pago.
+            </p>
+            <p className="text-xs text-orange-600 text-center italic">
+              Este PIN desbloqueará la entrada el día de tu evento.
+            </p>
+          </div>
 
           {/* Pago Único Card */}
           <div className="bg-orange-50 border border-orange-100 p-8 rounded-2xl text-center mb-2 shadow-sm">
