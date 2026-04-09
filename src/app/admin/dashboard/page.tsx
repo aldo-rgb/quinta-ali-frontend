@@ -508,9 +508,12 @@ export default function AdminDashboard() {
   // ─── Galería functions ───
   const cargarFotos = useCallback(async () => {
     try {
+      console.log('[Gallery] Fetching /api/galeria...');
       const data = await fetchAPI('/api/galeria');
+      console.log('[Gallery] Success! Data:', data);
       setFotos(data);
-    } catch {
+    } catch (err) {
+      console.error('[Gallery] Error fetching:', err);
       setFotos([]);
     }
   }, []);
