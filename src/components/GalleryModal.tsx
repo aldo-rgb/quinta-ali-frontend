@@ -27,13 +27,29 @@ export default function GalleryModal({ area, label, emoji, onClose }: GalleryMod
   const [current, setCurrent] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchAPI('/api/galeria')
+    console.log('[GalleryModal] Loading photos for area:', area);
+    // Build URL - try area endpoint first, fallback to all and filter
+    const photoUrl = `/api/galeria/${area}`;
+    
+    fetchAPI(photoUrl)
       .then((data) => {
-        // Filter by area client-side since backend doesn't support /api/galeria/{area}
-        const filtered = data.filter((f: Foto) => f.area === area);
-        setFotos(filtered);
+        console.log('[GalleryModal] Fetched', data.length, 'photos for', area);
+        setFotos(data);
       })
-      .catch(() => setFotos([]))
+      .catch((err) => {
+        console.error('[GalleryModal] Error fetching from', photoUrl, ':', err);
+        // Fallback: fetch all and filter
+        return fetchAPI('/api/galeria')
+          .then((allData: Foto[]) => {
+            const filtered = allData.filter((f: Foto) => f.area === area);
+            console.log('[GalleryModal] Fetched', filtered.length, 'photos from fallback');
+            setFotos(filtered);
+          })
+          .catch((fallbackErr) => {
+            console.error('[GalleryModal] Error fetching from fallback:', fallbackErr);
+            setFotos([]);
+          });
+      })
       .finally(() => setCargando(false));
   }, [area]);
 
