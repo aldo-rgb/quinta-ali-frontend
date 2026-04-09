@@ -5,7 +5,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || (
 );
 
 // Endpoints que deben usar proxy local en producción
-const PROXY_ENDPOINTS = ['/api/galeria', '/api/google-reviews'];
+const PROXY_ENDPOINTS = ['/api/google-reviews']; // Removed /api/galeria - it handles paths better going directly to backend
 
 export async function fetchAPI(endpoint: string, options?: RequestInit) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
