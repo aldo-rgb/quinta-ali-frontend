@@ -614,10 +614,10 @@ function ReservarContent() {
                           ? 'bg-primary text-white'
                           : esRango
                           ? 'bg-primary/20 text-gray-700'
-                          : noDisponible
-                          ? 'bg-red-200 text-red-700 cursor-not-allowed font-bold'
                           : isPast
                           ? 'text-gray-200 cursor-not-allowed'
+                          : noDisponible
+                          ? 'bg-red-200 text-red-700 cursor-not-allowed font-bold'
                           : 'hover:bg-primary/10 text-gray-700'
                       }`}
                     >
