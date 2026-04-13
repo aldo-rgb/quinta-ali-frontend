@@ -116,6 +116,8 @@ function ReservarContent() {
   // Extras (upselling)
   const [extrasDisponibles, setExtrasDisponibles] = useState<Extra[]>([]);
   const [extrasSeleccionados, setExtrasSeleccionados] = useState<Map<number, number>>(new Map());
+  const [extrasLoading, setExtrasLoading] = useState(true);
+  const [extrasError, setExtrasError] = useState<string | null>(null);
 
   // Firma digital
   const sigCanvas = useRef<SignatureCanvas>(null);
@@ -138,11 +140,25 @@ function ReservarContent() {
   // Precios dinámicos del mes
   const [preciosMes, setPreciosMes] = useState<Record<string, { precioBase: number; precioFinal: number; tieneDescuento: boolean; porcentajeDescuento: number }>>({});
 
+  // Función para cargar extras con manejo de errores
+  function cargarExtras() {
+    setExtrasLoading(true);
+    setExtrasError(null);
+    fetchAPI('/api/extras')
+      .then((data) => {
+        setExtrasDisponibles(data);
+        setExtrasError(null);
+      })
+      .catch((err) => {
+        setExtrasError('Error cargando extras. Intenta de nuevo.');
+        setExtrasDisponibles([]);
+      })
+      .finally(() => setExtrasLoading(false));
+  }
+
   // Cargar extras y paquetes
   useEffect(() => {
-    fetchAPI('/api/extras')
-      .then(setExtrasDisponibles)
-      .catch(() => {});
+    cargarExtras();
     fetchAPI('/api/paquetes').then((data) => {
       if (Array.isArray(data) && data.length > 0) {
         const parsed = data.map((p: Paquete) => ({ ...p, precio: Number(p.precio) }));
@@ -1022,7 +1038,23 @@ function ReservarContent() {
             <p className="text-sm text-gray-500">{t('reservar.agrega_extras')}</p>
           </div>
 
-          {extrasDisponibles.length === 0 ? (
+          {extrasLoading && extrasDisponibles.length === 0 ? (
+            <div className="text-center py-6">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-gray-400 text-sm">{t('reservar.cargando_extras')}</p>
+            </div>
+          ) : extrasError ? (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center space-y-3">
+              <p className="text-red-600 text-sm font-medium">❌ {extrasError}</p>
+              <button
+                type="button"
+                onClick={cargarExtras}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm transition-all active:scale-95"
+              >
+                🔄 Reintentar
+              </button>
+            </div>
+          ) : extrasDisponibles.length === 0 ? (
             <p className="text-center text-gray-400 text-sm py-4">{t('reservar.cargando_extras')}</p>
           ) : (
             <div className="space-y-3">
