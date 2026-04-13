@@ -506,6 +506,19 @@ export default function AdminDashboard() {
     router.replace('/admin');
   }
 
+  // Función para obtener estado de pago
+  function getPaymentStatus(monto_pagado: number | null, monto_total: number) {
+    const pagado = monto_pagado || 0;
+    if (pagado === 0) {
+      return { label: '⏳ Sin pagar', color: 'bg-gray-100 text-gray-700', percentage: 0 };
+    } else if (pagado >= monto_total) {
+      return { label: '✅ Pagado', color: 'bg-green-100 text-green-700', percentage: 100 };
+    } else {
+      const percentage = Math.round((pagado / monto_total) * 100);
+      return { label: `💰 ${percentage}% pagado`, color: 'bg-blue-100 text-blue-700', percentage };
+    }
+  }
+
   // ─── Galería functions ───
   const cargarFotos = useCallback(async () => {
     try {
@@ -914,12 +927,19 @@ export default function AdminDashboard() {
               );
             }
             
-            return filtradas.map((res) => (
+            return filtradas.map((res) => {
+              const paymentStatus = getPaymentStatus(res.monto_pagado, res.monto_total);
+              return (
             <div key={res.id} className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
               <div className="flex items-start justify-between cursor-pointer" onClick={() => setResExpandida(resExpandida === res.id ? null : res.id)}>
-                <div>
+                <div className="flex-1">
                   <p className="font-bold">{res.cliente_nombre} {res.cliente_apellido}</p>
                   <p className="text-sm text-gray-500">{res.paquete_nombre}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${paymentStatus.color}`}>
+                      {paymentStatus.label}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${estadoColors[res.estado] || 'bg-gray-100'}`}>
@@ -1052,7 +1072,8 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            ));
+            );
+            });
           })()}
         </div>
       )}
