@@ -198,6 +198,14 @@ function ReservarContent() {
     return new Date(year, month - 1, day);
   }
 
+  // Format date to YYYY-MM-DD in local timezone
+  function formatDateLocal(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   // Precio dinámico del día seleccionado o rango de noches
   function calcularPrecioPaquete(): number {
     if (esNoche && form.fecha_inicio && form.fecha_fin) {
@@ -208,7 +216,7 @@ function ReservarContent() {
       let fechaActual = new Date(inicio);
       
       while (fechaActual <= fin) {
-        const dateStr = fechaActual.toISOString().split('T')[0];
+        const dateStr = formatDateLocal(fechaActual);
         const precioDelDia = preciosMes[dateStr];
         totalPrecio += precioDelDia ? precioDelDia.precioFinal : (paqueteSeleccionado?.precio || 0);
         fechaActual.setDate(fechaActual.getDate() + 1);
