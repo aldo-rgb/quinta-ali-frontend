@@ -933,7 +933,7 @@ export default function AdminDashboard() {
                   : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
               }`}
             >
-              {mostrarArchivadas ? '📦 Mostrando archivadas' : '📦 Ver solo presentes/futuras'}
+              {mostrarArchivadas ? '📦 Ver archivadas' : '✓ Presentes/Futuras (click para archivadas)'}
             </button>
           </div>
 
