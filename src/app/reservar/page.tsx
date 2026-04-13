@@ -176,14 +176,17 @@ function ReservarContent() {
     const oldPaquete = paquetes.find(p => String(p.id) === form.paquete_id);
     const newPaquete = paquetes.find(p => String(p.id) === newPaqueteId);
     
-    // Si el tipo de paquete cambia (horas <-> noche), limpiar fechas para forzar nueva selección
+    // Bug 5 fix: Si el tipo de paquete cambia, pedir confirmación
     if (oldPaquete && newPaquete && oldPaquete.tipo_duracion !== newPaquete.tipo_duracion) {
-      setForm((prev) => ({
-        ...prev,
-        paquete_id: newPaqueteId,
-        fecha_inicio: '',
-        fecha_fin: '',
-      }));
+      const confirmed = window.confirm(`⚠️ Cambiar de ${oldPaquete.nombre} a ${newPaquete.nombre} borrará las fechas seleccionadas. ¿Continuar?`);
+      if (confirmed) {
+        setForm((prev) => ({
+          ...prev,
+          paquete_id: newPaqueteId,
+          fecha_inicio: '',
+          fecha_fin: '',
+        }));
+      }
     } else {
       updateField('paquete_id', newPaqueteId);
     }
@@ -479,12 +482,15 @@ function ReservarContent() {
       .catch(() => setPreciosMes({}));
   }, [viewMonth, viewYear, form.paquete_id]);
 
-  // Cargar horarios ocupados al seleccionar fecha
+  // Cargar horarios ocupados al seleccionar fecha - Bug 8: Debounce para evitar múltiples llamadas
   useEffect(() => {
     if (!form.fecha_inicio) { setHorariosOcupados([]); return; }
-    fetchAPI(`/api/reservaciones/disponibilidad?fecha=${form.fecha_inicio}`)
-      .then((data) => setHorariosOcupados(data))
-      .catch(() => setHorariosOcupados([]));
+    const timer = setTimeout(() => {
+      fetchAPI(`/api/reservaciones/disponibilidad?fecha=${form.fecha_inicio}`)
+        .then((data) => setHorariosOcupados(data))
+        .catch(() => setHorariosOcupados([]));
+    }, 500);
+    return () => clearTimeout(timer);
   }, [form.fecha_inicio]);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -824,7 +830,7 @@ function ReservarContent() {
             <input
               type="text"
               value={form.nombre}
-              onChange={(e) => updateField('nombre', e.target.value)}
+              onChange={(e) => updateField('nombre', e.target.value.trim())}
               placeholder={t('reservar.placeholder_nombre')}
               readOnly={!!session?.user?.name}
               className={`w-full p-3 rounded-xl border border-gray-200 text-base ${session?.user?.name ? 'bg-gray-50 text-gray-600' : ''}`}
@@ -854,7 +860,10 @@ function ReservarContent() {
             <input
               type="tel"
               value={form.telefono}
-              onChange={(e) => updateField('telefono', e.target.value)}
+              onChange={(e) => {
+                const tel = e.target.value.replace(/[^0-9\s\-\+\(\)]/g, '');
+                updateField('telefono', tel);
+              }}
               placeholder="81 1234 5678"
               required
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
@@ -885,11 +894,17 @@ function ReservarContent() {
             <label className="block text-sm font-semibold mb-1">{t('reservar.notas')}</label>
             <textarea
               value={form.notas}
-              onChange={(e) => updateField('notas', e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= 500) {
+                  updateField('notas', e.target.value);
+                }
+              }}
               placeholder={t('reservar.placeholder_notas')}
               rows={3}
+              maxLength={500}
               className="w-full p-3 rounded-xl border border-gray-200 text-base resize-none"
             />
+            <p className="text-xs text-gray-400 mt-1">{form.notas.length}/500</p>
           </div>
 
           {/* Promotor / Referido */}
@@ -898,7 +913,10 @@ function ReservarContent() {
             <input
               type="text"
               value={form.promotor}
-              onChange={(e) => updateField('promotor', e.target.value)}
+              onChange={(e) => {
+                const sanitized = e.target.value.replace(/[<>"'&]/g, '');
+                updateField('promotor', sanitized);
+              }}
               placeholder={t('reservar.promotor_placeholder')}
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
@@ -1057,7 +1075,11 @@ function ReservarContent() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setStep(2)}
+            <button type="button" onClick={() => {
+              localStorage.setItem('reservar_form_backup', JSON.stringify(form));
+              localStorage.setItem('reservar_extras_backup', JSON.stringify(Array.from(extrasSeleccionados.entries())));
+              setStep(2);
+            }}
               className="flex-1 border border-gray-300 text-gray-700 font-semibold py-4 rounded-full active:scale-95 transition-transform">
               {t('reservar.atras')}
             </button>
@@ -1112,7 +1134,7 @@ function ReservarContent() {
                 className="text-xs text-gray-400 underline">
                 {t('reservar.limpiar_firma')}
               </button>
-              {firmaGuardada && (
+              {firmaGuardada && sigCanvas.current && !sigCanvas.current.isEmpty() && (
                 <span className="text-xs text-green-600 font-medium">{t('reservar.firma_capturada')}</span>
               )}
             </div>
@@ -1128,8 +1150,8 @@ function ReservarContent() {
               {t('reservar.atras')}
             </button>
             <button type="button" onClick={() => setStep(5)}
-              disabled={!firmaGuardada}
-              className="flex-[2] bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform disabled:bg-gray-300">
+              disabled={!firmaGuardada || (sigCanvas.current && sigCanvas.current.isEmpty())}
+              className="flex-[2] bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform disabled:bg-gray-300 disabled:cursor-not-allowed">
               {t('reservar.revisar_confirmar')}
             </button>
           </div>
