@@ -61,6 +61,7 @@ interface Reservacion {
   promotor: string | null;
   checkin_at: string | null;
   checkout_at: string | null;
+  archivada: boolean;
 }
 
 interface Foto {
@@ -198,6 +199,7 @@ export default function AdminDashboard() {
   const [editandoAnticipo, setEditandoAnticipo] = useState<number | null>(null);
   const [nuevoAnticipo, setNuevoAnticipo] = useState('');
   const [busquedaReservaciones, setBusquedaReservaciones] = useState('');
+  const [mostrarArchivadas, setMostrarArchivadas] = useState(false);
 
   // Galería state
   const [fotos, setFotos] = useState<Foto[]>([]);
@@ -377,10 +379,11 @@ export default function AdminDashboard() {
     } catch { /* ignore */ }
   }
 
-  const cargarReservaciones = useCallback(async () => {
+  const cargarReservaciones = useCallback(async (incluirArchivadas: boolean = false) => {
     try {
+      const url = incluirArchivadas ? '/api/reservaciones?incluir_archivadas=true' : '/api/reservaciones';
       const [data, statsData] = await Promise.all([
-        fetchAPI('/api/reservaciones'),
+        fetchAPI(url),
         fetchAPI('/api/reservaciones/stats'),
       ]);
       setReservaciones(data);
@@ -395,8 +398,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     const auth = sessionStorage.getItem('admin_token');
     if (!auth) { router.replace('/admin'); return; }
-    cargarReservaciones();
-  }, [router, cargarReservaciones]);
+    cargarReservaciones(mostrarArchivadas);
+  }, [router, cargarReservaciones, mostrarArchivadas]);
 
   async function cambiarEstado(id: number, estado: string) {
     try {
@@ -506,6 +509,23 @@ export default function AdminDashboard() {
     router.replace('/admin');
   }
 
+  async function archivarReservacion(id: number, destinoArchivo: boolean) {
+    const accion = destinoArchivo ? 'archivar' : 'desarchivar';
+    if (!confirm(`¿Estás seguro de que quieres ${accion} esta reservación?`)) return;
+    
+    try {
+      await fetchAPI(`/api/reservaciones/${id}/archivar`, {
+        method: 'PATCH',
+        body: JSON.stringify({ archivada: destinoArchivo })
+      });
+      console.log(`✅ Reservación ${accion}ada`);
+      await cargarReservaciones(mostrarArchivadas);
+    } catch (err) {
+      console.error(`Error al ${accion}:`, err);
+      alert(`Error al ${accion} la reservación. Por favor intenta de nuevo.`);
+    }
+  }
+
   // Función para obtener estado de pago
   function getPaymentStatus(monto_pagado: number | null, monto_total: number) {
     const pagado = monto_pagado || 0;
@@ -517,6 +537,15 @@ export default function AdminDashboard() {
       const percentage = Math.round((pagado / monto_total) * 100);
       return { label: `💰 ${percentage}% pagado`, color: 'bg-blue-100 text-blue-700', percentage };
     }
+  }
+
+  // Función para saber si una reservación ya pasó
+  function esFechaPasada(fechaEvento: string): boolean {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fecha = new Date(fechaEvento);
+    fecha.setHours(0, 0, 0, 0);
+    return fecha < hoy;
   }
 
   // ─── Galería functions ───
@@ -887,7 +916,7 @@ export default function AdminDashboard() {
       {activeTab === 'reservaciones' && (
         <div className="px-4 mt-4 max-w-lg mx-auto space-y-3">
           {/* Search bar */}
-          <div className="sticky top-14 z-20 bg-background pt-2 pb-3">
+          <div className="sticky top-14 z-20 bg-background pt-2 pb-3 space-y-2">
             <input
               type="text"
               placeholder="🔍 Buscar por nombre, email, teléfono..."
@@ -895,6 +924,17 @@ export default function AdminDashboard() {
               onChange={(e) => setBusquedaReservaciones(e.target.value)}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
+            {/* Toggle para mostrar archivadas */}
+            <button
+              onClick={() => setMostrarArchivadas(!mostrarArchivadas)}
+              className={`w-full px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                mostrarArchivadas
+                  ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                  : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+              }`}
+            >
+              {mostrarArchivadas ? '📦 Mostrando archivadas' : '📦 Ver solo presentes/futuras'}
+            </button>
           </div>
 
           {cargando ? (
@@ -1065,8 +1105,23 @@ export default function AdminDashboard() {
                 </button>
               </div>
               )}
-              {/* Botón de eliminar */}
-              <div className="mt-3 pt-3 border-t border-gray-100">
+              {/* Botón de archivar/desarchivar */}
+              <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                {esFechaPasada(res.fecha_evento) && !res.archivada ? (
+                  <button
+                    onClick={() => archivarReservacion(res.id, true)}
+                    className="w-full bg-purple-50 text-purple-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-purple-100"
+                  >
+                    📦 Archivar
+                  </button>
+                ) : res.archivada ? (
+                  <button
+                    onClick={() => archivarReservacion(res.id, false)}
+                    className="w-full bg-gray-50 text-gray-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-gray-100"
+                  >
+                    📭 Desarchivar
+                  </button>
+                ) : null}
                 <button onClick={() => eliminarReservacion(res.id)} className="w-full bg-red-100 text-red-700 font-semibold py-2 rounded-lg text-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-red-200">
                   <Trash2 className="w-4 h-4" /> Eliminar reservación
                 </button>
