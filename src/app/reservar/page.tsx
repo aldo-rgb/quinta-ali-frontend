@@ -244,18 +244,27 @@ function ReservarContent() {
   async function subirINE(file: File) {
     setIneSubiendo(true);
     try {
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        throw new Error(`Archivo muy grande. Máximo: 5MB. Actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+      }
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Solo JPG, PNG, WebP o PDF');
+      }
       const formData = new FormData();
       formData.append('ine', file);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/reservaciones/subir-ine`, {
         method: 'POST',
         body: formData,
       });
-      if (!res.ok) throw new Error('Error al subir');
+      if (!res.ok) throw new Error('Error al subir el archivo');
       const data = await res.json();
       setIneUrl(data.url);
       setIneNombre(file.name);
-    } catch {
-      setError(t('reservar.ine_error'));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('reservar.ine_error');
+      setError(message);
     } finally {
       setIneSubiendo(false);
     }
@@ -508,7 +517,8 @@ function ReservarContent() {
     const inicio = parseLocalDate(form.fecha_inicio);
     const fin = parseLocalDate(form.fecha_fin);
     const diferencia = fin.getTime() - inicio.getTime();
-    return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+    // Si es el mismo día (diferencia 0), cuenta como 1 noche
+    return Math.max(1, Math.ceil(diferencia / (1000 * 60 * 60 * 24)));
   }
   function isDatePast(day: number) {
     const date = new Date(viewYear, viewMonth, day);
@@ -800,7 +810,13 @@ function ReservarContent() {
             <input
               type="email"
               value={form.email}
-              onChange={(e) => updateField('email', e.target.value)}
+              onChange={(e) => {
+                const email = e.target.value;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (email === '' || emailRegex.test(email)) {
+                  updateField('email', email);
+                }
+              }}
               placeholder="tu@email.com"
               readOnly={!!session?.user?.email}
               className={`w-full p-3 rounded-xl border border-gray-200 text-base ${session?.user?.email ? 'bg-gray-50 text-gray-600' : ''}`}
@@ -823,7 +839,15 @@ function ReservarContent() {
             <input
               type="number"
               value={form.num_invitados}
-              onChange={(e) => updateField('num_invitados', e.target.value)}
+              onChange={(e) => {
+                const num = Number(e.target.value);
+                const maxCapacity = paqueteSeleccionado?.capacidad_max || 100;
+                if (e.target.value === '' || (num >= 0 && num <= maxCapacity)) {
+                  updateField('num_invitados', e.target.value);
+                }
+              }}
+              min="0"
+              max={paqueteSeleccionado?.capacidad_max || 100}
               placeholder={paqueteSeleccionado ? `${t('reservar.maximo')} ${paqueteSeleccionado.capacidad_max}` : t('reservar.num_invitados')}
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
