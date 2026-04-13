@@ -192,13 +192,19 @@ function ReservarContent() {
     return total;
   }
 
+  // Parse date string in local timezone (not UTC)
+  function parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
   // Precio dinámico del día seleccionado o rango de noches
   function calcularPrecioPaquete(): number {
     if (esNoche && form.fecha_inicio && form.fecha_fin) {
       // Para paquetes de noche: sumar precios de cada día en el rango
       let totalPrecio = 0;
-      const inicio = new Date(form.fecha_inicio);
-      const fin = new Date(form.fecha_fin);
+      const inicio = parseLocalDate(form.fecha_inicio);
+      const fin = parseLocalDate(form.fecha_fin);
       let fechaActual = new Date(inicio);
       
       while (fechaActual <= fin) {
@@ -491,8 +497,8 @@ function ReservarContent() {
   // Función para calcular número de noches
   function calcularNoches(): number {
     if (!form.fecha_inicio || !form.fecha_fin) return 0;
-    const inicio = new Date(form.fecha_inicio);
-    const fin = new Date(form.fecha_fin);
+    const inicio = parseLocalDate(form.fecha_inicio);
+    const fin = parseLocalDate(form.fecha_fin);
     const diferencia = fin.getTime() - inicio.getTime();
     return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
   }
@@ -649,13 +655,13 @@ function ReservarContent() {
                   {esNoche && form.fecha_fin ? (
                     <>
                       <p className="text-sm font-semibold text-gray-700">
-                        {new Date(form.fecha_inicio).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })} — {new Date(form.fecha_fin).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}
+                        {parseLocalDate(form.fecha_inicio).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })} — {parseLocalDate(form.fecha_fin).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}
                       </p>
                       <p className="text-xs text-primary font-bold">{calcularNoches()} {calcularNoches() === 1 ? 'noche' : 'noches'}</p>
                     </>
                   ) : (
                     <p className="text-sm font-semibold text-gray-700">
-                      {new Date(form.fecha_inicio).toLocaleDateString('es-MX', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {parseLocalDate(form.fecha_inicio).toLocaleDateString('es-MX', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </p>
                   )}
                 </div>
