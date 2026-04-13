@@ -479,7 +479,7 @@ export default function AdminDashboard() {
     }
     
     if (resActual && monto > resActual.monto_total) {
-      alert(`El anticipo no puede ser mayor al total: $${resActual.monto_total}`);
+      alert(`El monto no puede exceder el total: $${resActual.monto_total}`);
       return;
     }
     
@@ -489,7 +489,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ monto_pagado: monto })
       });
       if (response && response.message) {
-        console.log('💰 Anticipo registrado:', response.message);
+        const esPagoCompleto = resActual && monto === resActual.monto_total;
+        console.log(`${esPagoCompleto ? '✅ Pago completo' : '💰 Anticipo'} registrado:`, response.message);
         setEditandoAnticipo(null);
         setNuevoAnticipo('');
         await cargarReservaciones();
@@ -950,7 +951,7 @@ export default function AdminDashboard() {
                       setNuevoAnticipo(String(res.monto_pagado || 0));
                     }}
                     className="p-1 hover:bg-gray-100 rounded transition-colors"
-                    title="Registrar anticipo"
+                    title="Registrar pago o anticipo"
                   >
                     <CreditCard className="w-3.5 h-3.5 text-gray-400 hover:text-blue-600" />
                   </button>
@@ -1092,24 +1093,36 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Modal para registrar anticipo */}
+      {/* Modal para registrar pago/anticipo */}
       {editandoAnticipo && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-bold mb-4">Registrar Anticipo</h3>
+            <h3 className="text-lg font-bold mb-4">Registrar Pago</h3>
             <div className="space-y-3">
-              {reservaciones.find((r) => r.id === editandoAnticipo) && (
-                <div className="bg-gray-100 p-3 rounded-lg text-sm">
-                  <div className="font-semibold mb-1">
-                    Total: ${reservaciones.find((r) => r.id === editandoAnticipo)?.monto_total || 0}
+              {reservaciones.find((r) => r.id === editandoAnticipo) && (() => {
+                const res = reservaciones.find((r) => r.id === editandoAnticipo);
+                const montoPropuesto = Number(nuevoAnticipo);
+                const esPagoCompleto = montoPropuesto === res?.monto_total;
+                const mostrarTipo = !isNaN(montoPropuesto) && montoPropuesto > 0;
+                
+                return (
+                  <div className="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
+                    <div className="font-semibold">
+                      Total: ${Number(res?.monto_total || 0).toLocaleString('es-MX')}
+                    </div>
+                    <div className="text-gray-600">
+                      Ya pagado: ${Number(res?.monto_pagado || 0).toLocaleString('es-MX')}
+                    </div>
+                    {mostrarTipo && (
+                      <div className={`text-xs font-bold px-2 py-1 rounded-full w-fit ${esPagoCompleto ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {esPagoCompleto ? '✅ Pago Completo' : '💰 Anticipo'}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-gray-600">
-                    Ya pagado: ${reservaciones.find((r) => r.id === editandoAnticipo)?.monto_pagado || 0}
-                  </div>
-                </div>
-              )}
+                );
+              })()}
               <div>
-                <label className="block text-sm font-semibold mb-1">Monto Pagado ($)</label>
+                <label className="block text-sm font-semibold mb-1">Monto a Pagar ($)</label>
                 <input
                   type="number"
                   value={nuevoAnticipo}
