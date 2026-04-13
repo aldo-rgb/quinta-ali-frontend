@@ -171,6 +171,24 @@ function ReservarContent() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  // Bug 4 fix: Manejar cambio de paquete con validación de fechas
+  function handleChangePaquete(newPaqueteId: string) {
+    const oldPaquete = paquetes.find(p => String(p.id) === form.paquete_id);
+    const newPaquete = paquetes.find(p => String(p.id) === newPaqueteId);
+    
+    // Si el tipo de paquete cambia (horas <-> noche), limpiar fechas para forzar nueva selección
+    if (oldPaquete && newPaquete && oldPaquete.tipo_duracion !== newPaquete.tipo_duracion) {
+      setForm((prev) => ({
+        ...prev,
+        paquete_id: newPaqueteId,
+        fecha_inicio: '',
+        fecha_fin: '',
+      }));
+    } else {
+      updateField('paquete_id', newPaqueteId);
+    }
+  }
+
   function toggleExtra(extraId: number) {
     setExtrasSeleccionados((prev) => {
       const next = new Map(prev);
@@ -273,6 +291,14 @@ function ReservarContent() {
   async function enviarReservacion() {
     setLoading(true);
     setError('');
+    
+    // Bug 11 + Bug 7 fix: Validar que teléfono esté presente (requerido para PIN)
+    if (!form.telefono || form.telefono.trim() === '') {
+      setError('El teléfono es requerido para recibir el código PIN por WhatsApp');
+      setLoading(false);
+      return;
+    }
+    
     try {
       const partes = form.nombre.trim().split(' ');
       const nombre = partes[0];
@@ -560,7 +586,7 @@ function ReservarContent() {
                 <button
                   key={paq.id}
                   type="button"
-                  onClick={() => updateField('paquete_id', String(paq.id))}
+                  onClick={() => handleChangePaquete(String(paq.id))}
                   className={`p-3 rounded-xl border-2 text-left transition-all active:scale-95 ${
                     form.paquete_id === String(paq.id)
                       ? 'border-primary bg-primary/5'
@@ -824,14 +850,16 @@ function ReservarContent() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-1">{t('reservar.whatsapp_tel')}</label>
+            <label className="block text-sm font-semibold mb-1">🔴 {t('reservar.whatsapp_tel')}</label>
             <input
               type="tel"
               value={form.telefono}
               onChange={(e) => updateField('telefono', e.target.value)}
               placeholder="81 1234 5678"
+              required
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
+            <p className="text-xs text-gray-400 mt-1">Requerido para recibir el código PIN por WhatsApp</p>
           </div>
 
           <div>
@@ -1200,8 +1228,8 @@ function ReservarContent() {
           <button
             type="button"
             onClick={enviarReservacion}
-            disabled={loading}
-            className="w-full bg-accent text-gray-900 font-bold py-4 rounded-full text-base active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-50"
+            disabled={loading || !form.telefono?.trim()}
+            className="w-full bg-accent text-gray-900 font-bold py-4 rounded-full text-base active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span>{t('reservar.procesando')}</span>
