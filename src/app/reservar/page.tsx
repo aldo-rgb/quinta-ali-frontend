@@ -858,27 +858,8 @@ function ReservarContent() {
             <input
               type="email"
               value={form.email}
-              onChange={(e) => {
-                console.log('📧 EMAIL CHANGED:', e.target.value);
-                console.log('📧 Email state before:', form.email);
-                updateField('email', e.target.value);
-              }}
-              onInput={(e) => {
-                console.log('📧 INPUT EVENT:', (e.target as HTMLInputElement).value);
-              }}
-              onKeyDown={(e) => {
-                console.log('📧 KEY DOWN:', e.key);
-                if (e.key === 't') {
-                  alert('⚠️ TECLA DETECTADA: ' + e.key);
-                }
-              }}
-              onKeyUp={(e) => {
-                console.log('📧 KEY UP:', e.key);
-              }}
-              onFocus={() => console.log('📧 EMAIL FOCUSED')}
-              onBlur={() => console.log('📧 EMAIL BLURRED')}
+              onChange={(e) => updateField('email', e.target.value)}
               placeholder="tu@email.com"
-              disabled={false}
               autoComplete="email"
               className="w-full p-3 rounded-xl border border-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-primary"
             />
