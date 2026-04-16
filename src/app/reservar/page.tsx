@@ -853,13 +853,21 @@ function ReservarContent() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1">{t('reservar.email')}</label>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>{t('reservar.email')}</label>
             <input
               value={form.email}
               onChange={(e) => setForm({...form, email: e.target.value})}
               placeholder="tu@email.com"
-              className="w-full p-3 rounded-xl border border-gray-200 text-base"
+              style={{ 
+                width: '100%', 
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit'
+              }}
             />
           </div>
 
