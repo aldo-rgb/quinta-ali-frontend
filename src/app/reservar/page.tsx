@@ -860,8 +860,9 @@ function ReservarContent() {
               value={form.email}
               onChange={(e) => updateField('email', e.target.value)}
               placeholder="tu@email.com"
+              readOnly={!!session?.user?.email}
               autoComplete="email"
-              className="w-full p-3 rounded-xl border border-gray-200 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+              className={`w-full p-3 rounded-xl border border-gray-200 text-base ${session?.user?.email ? 'bg-gray-50 text-gray-600' : ''}`}
             />
           </div>
 
