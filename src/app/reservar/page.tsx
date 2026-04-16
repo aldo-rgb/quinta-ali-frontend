@@ -1195,7 +1195,7 @@ function ReservarContent() {
               {t('reservar.atras')}
             </button>
             <button type="button" onClick={() => setStep(5)}
-              disabled={!firmaGuardada || (sigCanvas.current && sigCanvas.current.isEmpty())}
+              disabled={!firmaGuardada || !!(sigCanvas.current && sigCanvas.current.isEmpty())}
               className="flex-[2] bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform disabled:bg-gray-300 disabled:cursor-not-allowed">
               {t('reservar.revisar_confirmar')}
             </button>
