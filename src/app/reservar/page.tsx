@@ -857,10 +857,14 @@ function ReservarContent() {
             <label className="block text-sm font-semibold mb-1">{t('reservar.email')}</label>
             <input
               type="text"
+              inputMode="email"
               value={form.email}
               onChange={(e) => updateField('email', e.target.value)}
+              onInput={(e) => updateField('email', (e.target as HTMLInputElement).value)}
               placeholder="tu@email.com"
+              autoComplete="email"
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
+              style={{ WebkitAutofillColor: 'unset' }}
             />
           </div>
 
