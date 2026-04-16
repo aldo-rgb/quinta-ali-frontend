@@ -866,8 +866,7 @@ function ReservarContent() {
                 }
               }}
               placeholder="tu@email.com"
-              readOnly={!!session?.user?.email}
-              className={`w-full p-3 rounded-xl border border-gray-200 text-base ${session?.user?.email ? 'bg-gray-50 text-gray-600' : ''}`}
+              className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
           </div>
 
