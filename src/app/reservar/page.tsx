@@ -858,13 +858,7 @@ function ReservarContent() {
             <input
               type="email"
               value={form.email}
-              onChange={(e) => {
-                const email = e.target.value;
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (email === '' || emailRegex.test(email)) {
-                  updateField('email', email);
-                }
-              }}
+              onChange={(e) => updateField('email', e.target.value)}
               placeholder="tu@email.com"
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
