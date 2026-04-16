@@ -856,7 +856,7 @@ function ReservarContent() {
           <div>
             <label className="block text-sm font-semibold mb-1">{t('reservar.email')}</label>
             <input
-              type="email"
+              type="text"
               value={form.email}
               onChange={(e) => updateField('email', e.target.value)}
               placeholder="tu@email.com"
