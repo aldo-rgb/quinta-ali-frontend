@@ -1008,7 +1008,7 @@ export default function AdminDashboard() {
                   <button
                     onClick={() => {
                       setEditandoAnticipo(res.id);
-                      setNuevoAnticipo(String(res.monto_pagado || 0));
+                      setNuevoAnticipo('');
                     }}
                     className="p-1 hover:bg-gray-100 rounded transition-colors"
                     title="Registrar pago o anticipo"
