@@ -846,7 +846,7 @@ function ReservarContent() {
             <input
               type="text"
               value={form.nombre}
-              onChange={(e) => updateField('nombre', e.target.value.trim())}
+              onChange={(e) => updateField('nombre', e.target.value)}
               placeholder={t('reservar.placeholder_nombre')}
               readOnly={!!session?.user?.name}
               className={`w-full p-3 rounded-xl border border-gray-200 text-base ${session?.user?.name ? 'bg-gray-50 text-gray-600' : ''}`}
