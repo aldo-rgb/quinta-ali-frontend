@@ -839,6 +839,8 @@ export default function AdminDashboard() {
   const reservacionesHoy = reservaciones.filter((r) => r.fecha_evento?.split('T')[0] === hoy && r.estado !== 'cancelada');
   const pendientes = reservaciones.filter((r) => r.estado === 'pendiente');
   const ingresos = reservaciones.reduce((sum, r) => sum + Number(r.monto_total), 0);
+  const totalPagado = reservaciones.reduce((sum, r) => sum + Number(r.monto_pagado || 0), 0);
+  const pendientePago = ingresos - totalPagado;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -875,9 +877,21 @@ export default function AdminDashboard() {
           </p>
         </div>
         <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15">
-          <p className="text-xs text-gray-400">Ingresos del mes</p>
+          <p className="text-xs text-gray-400">Total Rentas del mes</p>
           <p className="text-2xl font-extrabold text-green-600 mt-1">
             ${(stats?.ingresos_mes ?? ingresos).toLocaleString('es-MX')}
+          </p>
+        </div>
+        <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15">
+          <p className="text-xs text-gray-400">Total Pagado</p>
+          <p className="text-2xl font-extrabold text-blue-600 mt-1">
+            ${totalPagado.toLocaleString('es-MX')}
+          </p>
+        </div>
+        <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15">
+          <p className="text-xs text-gray-400">Pendiente por cobrar</p>
+          <p className="text-2xl font-extrabold text-orange-500 mt-1">
+            ${pendientePago.toLocaleString('es-MX')}
           </p>
         </div>
         <div className="bg-white/70 rounded-xl p-4 border border-primary-light/15">
