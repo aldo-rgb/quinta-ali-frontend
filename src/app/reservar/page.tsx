@@ -856,13 +856,19 @@ function ReservarContent() {
           <div>
             <label className="block text-sm font-semibold mb-1">{t('reservar.email')}</label>
             <input
-              type="text"
+              type="email"
               value={form.email}
               onChange={(e) => {
                 console.log('📧 EMAIL CHANGED:', e.target.value);
+                console.log('📧 Email state before:', form.email);
                 updateField('email', e.target.value);
               }}
+              onInput={(e) => {
+                console.log('📧 INPUT EVENT:', (e.target as HTMLInputElement).value);
+              }}
               placeholder="tu@email.com"
+              disabled={false}
+              autoComplete="email"
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
           </div>
