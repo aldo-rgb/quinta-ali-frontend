@@ -858,7 +858,10 @@ function ReservarContent() {
             <input
               type="text"
               value={form.email}
-              onChange={(e) => updateField('email', e.target.value)}
+              onChange={(e) => {
+                console.log('📧 EMAIL CHANGED:', e.target.value);
+                updateField('email', e.target.value);
+              }}
               placeholder="tu@email.com"
               className="w-full p-3 rounded-xl border border-gray-200 text-base"
             />
