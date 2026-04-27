@@ -200,6 +200,8 @@ export default function AdminDashboard() {
   const [nuevoAnticipo, setNuevoAnticipo] = useState('');
   const [busquedaReservaciones, setBusquedaReservaciones] = useState('');
   const [mostrarArchivadas, setMostrarArchivadas] = useState(false);
+  const [archiviandoVencidas, setArchiviandoVencidas] = useState(false);
+  const [archivoResultado, setArchivoResultado] = useState<{ cantidad: number; timestamp: number } | null>(null);
 
   // Galería state
   const [fotos, setFotos] = useState<Foto[]>([]);
@@ -510,6 +512,30 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('❌ Error actualizando anticipo:', err);
       alert('Error al registrar el anticipo. Por favor intenta de nuevo.');
+    }
+  }
+
+  async function archivarVencidas() {
+    if (!confirm('¿Archivar todas las reservaciones vencidas (fecha_fin < hoy)?')) return;
+    
+    setArchiviandoVencidas(true);
+    try {
+      const response = await fetchAPI('/api/reservaciones/archivar-vencidas', {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+      if (response && response.cantidad !== undefined) {
+        setArchivoResultado({ cantidad: response.cantidad, timestamp: Date.now() });
+        console.log(`✅ ${response.cantidad} reservaciones archivadas`);
+        await cargarReservaciones();
+        // Limpiar el resultado en 5 segundos
+        setTimeout(() => setArchivoResultado(null), 5000);
+      }
+    } catch (err) {
+      console.error('❌ Error archivando vencidas:', err);
+      alert('Error al archivar reservaciones vencidas. Por favor intenta de nuevo.');
+    } finally {
+      setArchiviandoVencidas(false);
     }
   }
 
@@ -948,16 +974,45 @@ export default function AdminDashboard() {
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
             {/* Toggle para mostrar archivadas */}
-            <button
-              onClick={() => setMostrarArchivadas(!mostrarArchivadas)}
-              className={`w-full px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                mostrarArchivadas
-                  ? 'bg-purple-100 text-purple-700 border border-purple-300'
-                  : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
-              }`}
-            >
-              {mostrarArchivadas ? '📦 Ver archivadas' : '✓ Presentes/Futuras (click para archivadas)'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMostrarArchivadas(!mostrarArchivadas)}
+                className={`flex-1 px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                  mostrarArchivadas
+                    ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                }`}
+              >
+                {mostrarArchivadas ? '📦 Ver archivadas' : '✓ Presentes/Futuras (click para archivadas)'}
+              </button>
+              <button
+                onClick={archivarVencidas}
+                disabled={archiviandoVencidas}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
+                  archiviandoVencidas
+                    ? 'bg-gray-100 text-gray-400 border border-gray-200'
+                    : 'bg-red-100 text-red-700 border border-red-300 hover:bg-red-200'
+                }`}
+                title="Archivar automáticamente todas las reservaciones vencidas"
+              >
+                {archiviandoVencidas ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Archivando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🗂️</span>
+                    <span>Archivar vencidas</span>
+                  </>
+                )}
+              </button>
+            </div>
+            {archivoResultado && (
+              <div className="bg-green-50 border border-green-300 rounded-lg p-3 text-center text-sm font-semibold text-green-700">
+                ✅ {archivoResultado.cantidad} reservaciones archivadas
+              </div>
+            )}
           </div>
 
           {cargando ? (
