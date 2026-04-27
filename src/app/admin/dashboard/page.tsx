@@ -1195,7 +1195,10 @@ export default function AdminDashboard() {
                     </p>
                   )}
                   <div className="flex items-center justify-between">
-                    <p className="text-gray-500">Pagado: <span className="font-semibold text-green-600">${Number(res.monto_pagado || 0).toLocaleString('es-MX')}</span> / ${Number(res.monto_total).toLocaleString('es-MX')}</p>
+                    <p className="text-gray-500">
+                      {getPaymentStatus(res.monto_pagado, res.monto_total).label}: 
+                      <span className="font-semibold ml-1">${Number(res.monto_pagado || 0).toLocaleString('es-MX')}</span> / ${Number(res.monto_total).toLocaleString('es-MX')}
+                    </p>
                   </div>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
