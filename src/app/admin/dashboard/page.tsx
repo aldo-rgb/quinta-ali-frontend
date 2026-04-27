@@ -202,6 +202,8 @@ export default function AdminDashboard() {
   const [mostrarArchivadas, setMostrarArchivadas] = useState(false);
   const [archiviandoVencidas, setArchiviandoVencidas] = useState(false);
   const [archivoResultado, setArchivoResultado] = useState<{ cantidad: number; timestamp: number } | null>(null);
+  const [reparandoEstados, setReparandoEstados] = useState(false);
+  const [reparoResultado, setReparoResultado] = useState<{ cantidad: number; timestamp: number } | null>(null);
   const [editandoNotas, setEditandoNotas] = useState<number | null>(null);
   const [nuevasNotas, setNuevasNotas] = useState('');
 
@@ -538,6 +540,30 @@ export default function AdminDashboard() {
       alert('Error al archivar reservaciones vencidas. Por favor intenta de nuevo.');
     } finally {
       setArchiviandoVencidas(false);
+    }
+  }
+
+  async function repararEstados() {
+    if (!confirm('¿Reparar reservaciones con estados incorrectos? (cambiar "pagada" a "confirmada" si no está 100% pagada)')) return;
+    
+    setReparandoEstados(true);
+    try {
+      const response = await fetchAPI('/api/reservaciones/reparar-estados', {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+      if (response && response.cantidad !== undefined) {
+        setReparoResultado({ cantidad: response.cantidad, timestamp: Date.now() });
+        console.log(`✅ ${response.cantidad} reservaciones reparadas`);
+        await cargarReservaciones();
+        // Limpiar el resultado en 5 segundos
+        setTimeout(() => setReparoResultado(null), 5000);
+      }
+    } catch (err) {
+      console.error('❌ Error reparando estados:', err);
+      alert('Error al reparar estados. Por favor intenta de nuevo.');
+    } finally {
+      setReparandoEstados(false);
     }
   }
 
@@ -1029,10 +1055,37 @@ export default function AdminDashboard() {
                   </>
                 )}
               </button>
+              <button
+                onClick={repararEstados}
+                disabled={reparandoEstados}
+                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 ${
+                  reparandoEstados
+                    ? 'bg-gray-100 text-gray-400 border border-gray-200'
+                    : 'bg-orange-100 text-orange-700 border border-orange-300 hover:bg-orange-200'
+                }`}
+                title="Reparar reservaciones con estados incorrectos"
+              >
+                {reparandoEstados ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Reparando...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🔧</span>
+                    <span>Reparar estados</span>
+                  </>
+                )}
+              </button>
             </div>
             {archivoResultado && (
               <div className="bg-green-50 border border-green-300 rounded-lg p-3 text-center text-sm font-semibold text-green-700">
                 ✅ {archivoResultado.cantidad} reservaciones archivadas
+              </div>
+            )}
+            {reparoResultado && (
+              <div className="bg-blue-50 border border-blue-300 rounded-lg p-3 text-center text-sm font-semibold text-blue-700">
+                🔧 {reparoResultado.cantidad} reservaciones reparadas
               </div>
             )}
           </div>
