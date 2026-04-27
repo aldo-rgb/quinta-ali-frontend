@@ -857,20 +857,17 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Botón flotante: Reportar Problema (solo usuarios autenticados) */}
-      {session && (
-        <a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}?text=${encodeURIComponent('🚨 Hola, estoy en La Quinta de Alí y necesito reportar un detalle en las instalaciones:')}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-36 right-4 z-50 w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30 active:scale-90 transition-transform"
-          aria-label="Reportar Problema"
-        >
-          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-          </svg>
-        </a>
-      )}
+      {/* Botón flotante: Reportar Problema */}
+      <Link
+        href="/reporte"
+        className="fixed bottom-36 right-4 z-50 w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30 active:scale-90 transition-transform hover:bg-red-600"
+        aria-label="Reportar Problema"
+        title="Reportar un problema"
+      >
+        <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+      </Link>
 
       {/* WhatsApp flotante */}
       <a
