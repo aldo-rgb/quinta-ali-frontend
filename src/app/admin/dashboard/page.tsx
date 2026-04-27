@@ -473,27 +473,36 @@ export default function AdminDashboard() {
   }
 
   async function actualizarAnticipo(id: number) {
-    const monto = Number(nuevoAnticipo);
+    const montoNuevo = Number(nuevoAnticipo);
     const resActual = reservaciones.find((r) => r.id === id);
     
-    if (isNaN(monto) || monto < 0) {
+    if (isNaN(montoNuevo) || montoNuevo < 0) {
       alert('Por favor ingresa un monto válido');
       return;
     }
     
-    if (resActual && monto > resActual.monto_total) {
-      alert(`El monto no puede exceder el total: $${resActual.monto_total}`);
+    if (montoNuevo === 0) {
+      alert('Por favor ingresa un monto mayor a $0');
+      return;
+    }
+    
+    // Calcular el nuevo total SUMANDO el monto anterior + el nuevo pago
+    const montoPagadoAnterior = Number(resActual?.monto_pagado || 0);
+    const montoTotalNuevo = montoPagadoAnterior + montoNuevo;
+    
+    if (resActual && montoTotalNuevo > resActual.monto_total) {
+      alert(`El total pagado no puede exceder $${resActual.monto_total}. Ya tiene $${montoPagadoAnterior} pagado. Máximo a agregar: $${resActual.monto_total - montoPagadoAnterior}`);
       return;
     }
     
     try {
       const response = await fetchAPI(`/api/reservaciones/${id}/anticipo`, {
         method: 'PATCH',
-        body: JSON.stringify({ monto_pagado: monto })
+        body: JSON.stringify({ monto_pagado: montoTotalNuevo })
       });
       if (response && response.message) {
-        const esPagoCompleto = resActual && monto === resActual.monto_total;
-        console.log(`${esPagoCompleto ? '✅ Pago completo' : '💰 Anticipo'} registrado:`, response.message);
+        const esPagoCompleto = resActual && montoTotalNuevo === resActual.monto_total;
+        console.log(`${esPagoCompleto ? '✅ Pago completo' : '💰 Anticipo'} registrado: $${montoNuevo} sumado a $${montoPagadoAnterior} = $${montoTotalNuevo}`);
         setEditandoAnticipo(null);
         setNuevoAnticipo('');
         await cargarReservaciones();
@@ -1187,13 +1196,16 @@ export default function AdminDashboard() {
       {editandoAnticipo && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-bold mb-4">Registrar Pago</h3>
+            <h3 className="text-lg font-bold mb-4">Registrar Nuevo Pago</h3>
             <div className="space-y-3">
               {reservaciones.find((r) => r.id === editandoAnticipo) && (() => {
                 const res = reservaciones.find((r) => r.id === editandoAnticipo);
                 const montoPropuesto = Number(nuevoAnticipo);
-                const esPagoCompleto = montoPropuesto === res?.monto_total;
+                const montoPagadoAnterior = Number(res?.monto_pagado || 0);
+                const montoTotalNuevo = montoPagadoAnterior + montoPropuesto;
+                const esPagoCompleto = montoTotalNuevo === res?.monto_total;
                 const mostrarTipo = !isNaN(montoPropuesto) && montoPropuesto > 0;
+                const montoRestante = Number(res?.monto_total || 0) - montoPagadoAnterior;
                 
                 return (
                   <div className="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
@@ -1201,18 +1213,27 @@ export default function AdminDashboard() {
                       Total: ${Number(res?.monto_total || 0).toLocaleString('es-MX')}
                     </div>
                     <div className="text-gray-600">
-                      Ya pagado: ${Number(res?.monto_pagado || 0).toLocaleString('es-MX')}
+                      Ya pagado: ${montoPagadoAnterior.toLocaleString('es-MX')}
+                    </div>
+                    <div className="text-gray-600 text-xs">
+                      Falta: ${montoRestante.toLocaleString('es-MX')}
                     </div>
                     {mostrarTipo && (
-                      <div className={`text-xs font-bold px-2 py-1 rounded-full w-fit ${esPagoCompleto ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {esPagoCompleto ? '✅ Pago Completo' : '💰 Anticipo'}
-                      </div>
+                      <>
+                        <div className="border-t pt-2 mt-2">
+                          <span className="text-xs text-gray-500">Nuevo total después del pago:</span>
+                          <div className="font-bold text-lg">${montoTotalNuevo.toLocaleString('es-MX')}</div>
+                        </div>
+                        <div className={`text-xs font-bold px-2 py-1 rounded-full w-fit ${esPagoCompleto ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {esPagoCompleto ? '✅ Pago Completo' : '💰 Anticipo'}
+                        </div>
+                      </>
                     )}
                   </div>
                 );
               })()}
               <div>
-                <label className="block text-sm font-semibold mb-1">Monto a Pagar ($)</label>
+                <label className="block text-sm font-semibold mb-1">Monto a Pagar AHORA ($)</label>
                 <input
                   type="number"
                   value={nuevoAnticipo}
@@ -1221,6 +1242,7 @@ export default function AdminDashboard() {
                   placeholder="0.00"
                   min="0"
                 />
+                <p className="text-xs text-gray-500 mt-1">Este monto se sumará al total ya pagado</p>
               </div>
               <div className="flex gap-2 pt-2">
                 <button
