@@ -202,6 +202,8 @@ export default function AdminDashboard() {
   const [mostrarArchivadas, setMostrarArchivadas] = useState(false);
   const [archiviandoVencidas, setArchiviandoVencidas] = useState(false);
   const [archivoResultado, setArchivoResultado] = useState<{ cantidad: number; timestamp: number } | null>(null);
+  const [editandoNotas, setEditandoNotas] = useState<number | null>(null);
+  const [nuevasNotas, setNuevasNotas] = useState('');
 
   // Galería state
   const [fotos, setFotos] = useState<Foto[]>([]);
@@ -536,6 +538,26 @@ export default function AdminDashboard() {
       alert('Error al archivar reservaciones vencidas. Por favor intenta de nuevo.');
     } finally {
       setArchiviandoVencidas(false);
+    }
+  }
+
+  async function actualizarNotas(id: number) {
+    if (!nuevasNotas.trim() && !confirm('¿Dejar el campo de notas vacío?')) return;
+    
+    try {
+      const response = await fetchAPI(`/api/reservaciones/${id}/notas`, {
+        method: 'PATCH',
+        body: JSON.stringify({ notas: nuevasNotas.trim() })
+      });
+      if (response && response.message) {
+        console.log('📝 Notas actualizadas:', response.message);
+        setEditandoNotas(null);
+        setNuevasNotas('');
+        await cargarReservaciones();
+      }
+    } catch (err) {
+      console.error('❌ Error actualizando notas:', err);
+      alert('Error al actualizar las notas. Por favor intenta de nuevo.');
     }
   }
 
@@ -1122,9 +1144,25 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <p className="text-gray-500">Pagado: <span className="font-semibold text-green-600">${Number(res.monto_pagado || 0).toLocaleString('es-MX')}</span> / ${Number(res.monto_total).toLocaleString('es-MX')}</p>
                   </div>
-                  {res.notas && (
-                    <p className="text-xs text-gray-400 italic">{res.notas}</p>
-                  )}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      {res.notas ? (
+                        <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded italic">📝 {res.notas}</p>
+                      ) : (
+                        <p className="text-xs text-gray-300 italic">Sin comentarios</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditandoNotas(res.id);
+                        setNuevasNotas(res.notas || '');
+                      }}
+                      className="flex-shrink-0 text-gray-400 hover:text-blue-600 active:scale-95 transition-colors"
+                      title="Editar comentarios"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                   {res.promotor && (
                     <p className="flex items-center gap-2 text-xs text-purple-600 font-semibold">
                       🤝 Promotor: {res.promotor}
@@ -1311,6 +1349,43 @@ export default function AdminDashboard() {
                   className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Registrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para editar comentarios/notas */}
+      {editandoNotas && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Editar Comentarios</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Comentarios para la reservación</label>
+                <textarea
+                  value={nuevasNotas}
+                  onChange={(e) => setNuevasNotas(e.target.value.slice(0, 1000))}
+                  placeholder="Ej: Cliente vegano, requiere platería sin metal, etc..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                  rows={5}
+                  maxLength={1000}
+                />
+                <p className="text-xs text-gray-400 mt-1">{nuevasNotas.length}/1000 caracteres</p>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setEditandoNotas(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => actualizarNotas(editandoNotas)}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Guardar
                 </button>
               </div>
             </div>
