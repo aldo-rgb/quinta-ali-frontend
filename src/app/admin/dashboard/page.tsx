@@ -611,13 +611,14 @@ export default function AdminDashboard() {
 
   // Función para obtener estado de pago
   function getPaymentStatus(monto_pagado: number | null, monto_total: number) {
-    const pagado = monto_pagado || 0;
+    const pagado = Number(monto_pagado) || 0;
+    const total = Number(monto_total);
     if (pagado === 0) {
       return { label: '⏳ Sin pagar', color: 'bg-gray-100 text-gray-700', percentage: 0 };
-    } else if (pagado >= monto_total) {
+    } else if (pagado >= total) {
       return { label: '✅ Pagado', color: 'bg-green-100 text-green-700', percentage: 100 };
     } else {
-      const percentage = Math.round((pagado / monto_total) * 100);
+      const percentage = Math.round((pagado / total) * 100);
       return { label: `💰 ${percentage}% pagado`, color: 'bg-blue-100 text-blue-700', percentage };
     }
   }
