@@ -128,7 +128,7 @@ function ReservarContent() {
   const [ineNombre, setIneNombre] = useState<string | null>(null);
 
   // Disponibilidad del calendario
-  const [calendario, setCalendario] = useState<Record<string, { reservaciones: number; disponible: boolean }>>({});
+  const [calendario, setCalendario] = useState<Record<string, { reservaciones: number; disponible: boolean; tipo: 'basico' | 'hospedaje' | 'mixto' | null }>>({});
   const [horariosOcupados, setHorariosOcupados] = useState<{ hora_inicio: string; hora_fin: string; paquete_id: number }[]>([]);
   const [firmaGuardada, setFirmaGuardada] = useState(false);
   const [paquetes, setPaquetes] = useState<Paquete[]>(paquetesFallback);
@@ -658,8 +658,13 @@ function ReservarContent() {
                   const isPast = isDatePast(day);
                   const info = calendario[dateStr];
                   const noDisponible = info && !info.disponible;
+                  const tipo = info?.tipo ?? null;
                   const precioDay = preciosMes[dateStr];
                   const precioChanged = precioDay && precioDay.precioFinal !== precioDay.precioBase;
+
+                  const bloqueadoClass = tipo === 'hospedaje' || tipo === 'mixto'
+                    ? 'bg-blue-200 text-blue-700 cursor-not-allowed font-bold'
+                    : 'bg-red-200 text-red-700 cursor-not-allowed font-bold';
 
                   return (
                     <button
@@ -675,7 +680,7 @@ function ReservarContent() {
                           : isPast
                           ? 'text-gray-200 cursor-not-allowed'
                           : noDisponible
-                          ? 'bg-red-200 text-red-700 cursor-not-allowed font-bold'
+                          ? bloqueadoClass
                           : 'hover:bg-primary/10 text-gray-700'
                       }`}
                     >
