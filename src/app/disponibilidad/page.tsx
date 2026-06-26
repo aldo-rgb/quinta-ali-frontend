@@ -15,7 +15,7 @@ export default function DisponibilidadPage() {
   const today = new Date();
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [calendario, setCalendario] = useState<Record<string, { reservaciones: number; disponible: boolean }>>({});
+  const [calendario, setCalendario] = useState<Record<string, { reservaciones: number; disponible: boolean; tipo: 'basico' | 'hospedaje' | 'mixto' | null }>>({});
   const [loading, setLoading] = useState(true);
 
   const mes = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
@@ -85,25 +85,34 @@ export default function DisponibilidadPage() {
               const info = calendario[dateStr];
               const noDisponible = info && !info.disponible;
               const parcial = info && info.disponible && info.reservaciones > 0;
+              const tipo = info?.tipo ?? null;
+
+              const bgClass = noDisponible
+                ? tipo === 'hospedaje' || tipo === 'mixto'
+                  ? 'bg-blue-100 text-blue-500'
+                  : 'bg-red-100 text-red-400'
+                : isPast
+                ? 'text-gray-200'
+                : parcial
+                ? 'bg-yellow-50 text-gray-700 ring-2 ring-yellow-300'
+                : 'text-gray-700 bg-green-50/50';
+
+              const labelColor = noDisponible
+                ? tipo === 'hospedaje' || tipo === 'mixto'
+                  ? 'text-blue-500'
+                  : 'text-red-400'
+                : parcial
+                ? 'text-yellow-600'
+                : 'text-green-600';
 
               return (
                 <div
                   key={day}
-                  className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all ${
-                    noDisponible
-                      ? 'bg-red-100 text-red-400'
-                      : isPast
-                      ? 'text-gray-200'
-                      : parcial
-                      ? 'bg-yellow-50 text-gray-700 ring-2 ring-yellow-300'
-                      : 'text-gray-700 bg-green-50/50'
-                  }`}
+                  className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all ${bgClass}`}
                 >
                   <span>{day}</span>
                   {!isPast && !loading && (
-                    <span className={`text-[8px] mt-0.5 font-semibold ${
-                      noDisponible ? 'text-red-400' : parcial ? 'text-yellow-600' : 'text-green-600'
-                    }`}>
+                    <span className={`text-[8px] mt-0.5 font-semibold ${labelColor}`}>
                       {noDisponible ? 'Lleno' : parcial ? 'Parcial' : 'Libre'}
                     </span>
                   )}
@@ -113,7 +122,7 @@ export default function DisponibilidadPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-center gap-5 mt-5 pt-4 border-t border-gray-100">
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-5 pt-4 border-t border-gray-100">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full bg-green-400" />
               <span className="text-xs text-gray-500">Disponible</span>
@@ -124,7 +133,11 @@ export default function DisponibilidadPage() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full bg-red-400" />
-              <span className="text-xs text-gray-500">Lleno</span>
+              <span className="text-xs text-gray-500">Alí Party</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-blue-400" />
+              <span className="text-xs text-gray-500">Hospedaje</span>
             </div>
           </div>
         </div>
