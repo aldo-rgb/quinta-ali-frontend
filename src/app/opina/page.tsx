@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { fetchAPI } from '@/lib/api';
 
@@ -97,7 +98,14 @@ export default function Opina() {
         {vista === 'inicio' && (
           <>
             <div className="mb-6">
-              <h1 className="text-4xl mb-2">🌴</h1>
+              <Image
+                src="/logo.png"
+                alt="La Quinta de Alí"
+                width={200}
+                height={96}
+                priority
+                className="h-24 w-auto mx-auto mb-6 drop-shadow-2xl"
+              />
               <h2 className="text-3xl font-bold text-white mb-2">¿Cómo te fue?</h2>
               <p className="text-gray-400">Tu opinión le llega directo al equipo de La Quinta de Alí.</p>
             </div>
