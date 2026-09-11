@@ -45,6 +45,7 @@ interface TareaRino {
   envio_intentos: number;
   estado_rino: string | null;
   responsable_rino: string | null;
+  involucrados?: { email: string; nombre: string | null }[];
   completada_en: string | null;
   creado_en: string;
 }
@@ -500,7 +501,9 @@ export default function RinoTab() {
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    👷 {quien ?? 'Sin responsable'} · {formatFecha(t.creado_en)}{t.area ? ` · ${t.area}` : ''}
+                    👷 {quien ?? 'Sin responsable'}
+                    {t.involucrados?.length ? ` + ${t.involucrados.map((i) => i.nombre || i.email).join(', ')}` : ''}
+                    {' · '}{formatFecha(t.creado_en)}{t.area ? ` · ${t.area}` : ''}
                   </p>
                   {t.completada_en && (
                     <p className="text-xs text-green-600 mt-0.5">Terminada {formatFecha(t.completada_en)}</p>
