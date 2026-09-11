@@ -1,44 +1,33 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { fetchAPI } from '@/lib/api';
 
 export default function ReporteCliente() {
   const [area, setArea] = useState('');
   const [problema, setProblema] = useState('');
+  const [contacto, setContacto] = useState('');
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
 
-  // Enviar reporte a Rino
+  // El reporte se guarda en Quinta; el admin lo manda a mantenimiento de Rino
   const enviarReporte = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCargando(true);
     setError('');
 
     try {
-      // Llamar al endpoint API que se conecta a Rino
-      const response = await fetch('/api/reporte', {
+      await fetchAPI('/api/rino/reportes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ area, problema }),
+        body: JSON.stringify({ area, problema, contacto }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Error al enviar reporte');
-        setCargando(false);
-        return;
-      }
-
       setEnviado(true);
-      setCargando(false);
     } catch (err) {
       console.error('Error:', err);
-      setError('Error al conectar con el servidor');
+      setError(err instanceof Error ? err.message : 'Error al conectar con el servidor');
+    } finally {
       setCargando(false);
     }
   };
@@ -50,7 +39,7 @@ export default function ReporteCliente() {
           <div className="mb-6 text-7xl animate-bounce">✅</div>
           <h2 className="text-4xl font-bold mb-4">¡Reporte Recibido!</h2>
           <p className="text-gray-300 text-lg mb-8">
-            Nuestro equipo de mantenimiento ya fue notificado y está revisando tu reporte.
+            Nuestro equipo ya recibió tu reporte y lo va a atender lo antes posible.
           </p>
           <p className="text-sm text-gray-400 mb-8">
             Puedes cerrar esta ventana. Agradecemos tu ayuda para mantener La Quinta en perfectas condiciones.
@@ -117,10 +106,25 @@ export default function ReporteCliente() {
             <textarea
               className="w-full p-3 border-2 border-gray-600 rounded-xl bg-gray-700 text-white focus:outline-none focus:border-green-500 transition resize-none"
               rows={4}
+              maxLength={2000}
               placeholder="Ej. No hay papel higiénico, la luz no enciende, falta toallas..."
               value={problema}
               onChange={(e) => setProblema(e.target.value)}
               required
+            />
+          </div>
+
+          {/* Contacto */}
+          <div>
+            <label className="block text-sm font-bold text-gray-300 mb-2">
+              Tu nombre o teléfono <span className="font-normal text-gray-500">(opcional)</span>
+            </label>
+            <input
+              className="w-full p-3 border-2 border-gray-600 rounded-xl bg-gray-700 text-white focus:outline-none focus:border-green-500 transition"
+              maxLength={160}
+              placeholder="Para avisarte cuando quede resuelto"
+              value={contacto}
+              onChange={(e) => setContacto(e.target.value)}
             />
           </div>
 
@@ -136,7 +140,7 @@ export default function ReporteCliente() {
 
           {/* Info text */}
           <p className="text-xs text-center text-gray-500">
-            Tu reporte llegará directamente al equipo de mantenimiento de La Quinta.
+            Tu reporte le llega directamente al equipo de La Quinta.
           </p>
         </form>
 

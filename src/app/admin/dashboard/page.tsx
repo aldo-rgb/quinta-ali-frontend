@@ -11,11 +11,12 @@ import {
   MessageSquare, PenTool, Flame, Moon, Timer, Users, Sun, AlertTriangle,
   Waves, BedDouble, Droplets, TreePine, Gamepad2, Target, ListChecks, Heart,
   CreditCard, Loader2, XCircle, CheckCircle2, History, ChevronDown, Phone, Mail, Building2,
-  UserPlus, Trophy
+  UserPlus, Trophy, Wrench
 } from 'lucide-react';
 import { fetchAPI } from '@/lib/api';
 import { useTheme } from '@/lib/theme';
 import ReportesTab from '@/components/ReportesTab';
+import RinoTab from '@/components/RinoTab';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 function adminHeaders(extra?: Record<string, string>): Record<string, string> {
@@ -189,7 +190,7 @@ const estadoColors: Record<string, string> = {
 export default function AdminDashboard() {
   const router = useRouter();
   const { colors, updateColors, saving } = useTheme();
-  const [activeTab, setActiveTab] = useState<'reservaciones' | 'hoy' | 'galeria' | 'extras' | 'paquetes' | 'accesos' | 'resenas' | 'precios' | 'reportes' | 'config' | 'terminal' | 'corporativo' | 'promotores'>('reservaciones');
+  const [activeTab, setActiveTab] = useState<'reservaciones' | 'hoy' | 'galeria' | 'extras' | 'paquetes' | 'accesos' | 'resenas' | 'precios' | 'reportes' | 'config' | 'terminal' | 'corporativo' | 'promotores' | 'rino'>('reservaciones');
   const [reservaciones, setReservaciones] = useState<Reservacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -2232,6 +2233,9 @@ export default function AdminDashboard() {
       {/* Reportes tab */}
       {activeTab === 'reportes' && <ReportesTab />}
 
+      {/* Rino tab — mantenimiento con Rino Living */}
+      {activeTab === 'rino' && <RinoTab />}
+
       {/* Config tab */}
       {activeTab === 'config' && (
         <div className="px-4 mt-4 max-w-lg mx-auto space-y-3">
@@ -2883,6 +2887,7 @@ export default function AdminDashboard() {
           {[
             { key: 'reservaciones' as const, Icon: ClipboardList, label: 'Reservas' },
             { key: 'hoy' as const, Icon: CalendarDays, label: 'Hoy' },
+            { key: 'rino' as const, Icon: Wrench, label: 'Rino' },
             { key: 'extras' as const, Icon: Gift, label: 'Extras' },
             { key: 'paquetes' as const, Icon: Package, label: 'Paquetes' },
             { key: 'accesos' as const, Icon: KeyRound, label: 'Accesos' },
