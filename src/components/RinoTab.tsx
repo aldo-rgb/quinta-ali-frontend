@@ -69,6 +69,13 @@ const FORM_VACIO = {
   ticket_id: null as number | null,
 };
 
+const ORIGEN_TICKET: Record<string, string> = {
+  reporte_web: 'Reporte',
+  queja: 'Queja',
+  resena: 'Reseña baja',
+  bot_whatsapp: 'Bot WhatsApp',
+};
+
 const ETIQUETA_TICKET: Record<EstadoTicket, { texto: string; clase: string }> = {
   abierto: { texto: 'Abierto', clase: 'bg-amber-100 text-amber-700' },
   enviado_rino: { texto: 'En Rino', clase: 'bg-blue-100 text-blue-700' },
@@ -331,7 +338,7 @@ export default function RinoTab() {
             {ticketsVisibles.map((t) => (
               <div key={t.id} className="border border-gray-100 rounded-lg p-3 bg-white">
                 <div className="flex items-center justify-between text-[11px] text-gray-400">
-                  <span>#{t.id} · {t.categoria ?? 'Sin área'}</span>
+                  <span>#{t.id} · {ORIGEN_TICKET[t.origen] ?? 'Reporte'} · {t.categoria ?? 'Sin área'}</span>
                   <span>{formatFecha(t.creado_en)}</span>
                 </div>
                 <p className="text-sm mt-1 whitespace-pre-line break-words">{t.descripcion}</p>

@@ -17,6 +17,7 @@ import { fetchAPI } from '@/lib/api';
 import { useTheme } from '@/lib/theme';
 import ReportesTab from '@/components/ReportesTab';
 import RinoTab from '@/components/RinoTab';
+import OpinionesAdmin from '@/components/OpinionesAdmin';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 function adminHeaders(extra?: Record<string, string>): Record<string, string> {
@@ -1804,6 +1805,9 @@ export default function AdminDashboard() {
       {/* ═══ RESEÑAS & FIRMAS TAB ═══ */}
       {activeTab === 'resenas' && (
         <div className="px-4 mt-4 max-w-lg mx-auto space-y-4">
+          {/* Reseñas y quejas del QR */}
+          <OpinionesAdmin />
+
           {/* Sección Firmas */}
           <div className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
             <h3 className="font-bold mb-3 flex items-center gap-2"><PenTool className="w-5 h-5 text-primary/60" /> Firmas digitales ({firmas.length})</h3>
@@ -1831,7 +1835,8 @@ export default function AdminDashboard() {
 
           {/* Sección Reseñas */}
           <div className="bg-white/70 rounded-xl border border-primary-light/15 p-4">
-            <h3 className="font-bold mb-3 flex items-center gap-2"><Star className="w-5 h-5 text-primary/60" /> Reseñas ({resenas.length})</h3>
+            <h3 className="font-bold mb-1 flex items-center gap-2"><Star className="w-5 h-5 text-primary/60" /> Solicitudes por WhatsApp ({resenas.length})</h3>
+            <p className="text-xs text-gray-400 mb-3">En pausa: se pedían por WhatsApp al día siguiente del evento y nadie contestó (WhatsApp no las entregó). Las reseñas nuevas llegan por el QR.</p>
             {resenas.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-4">Sin reseñas todavía</p>
             ) : (
@@ -1841,7 +1846,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-semibold">{r.cliente_nombre} {r.cliente_apellido}</p>
-                        <p className="text-xs text-gray-400">{r.paquete_nombre} — {r.fecha_evento}</p>
+                        <p className="text-xs text-gray-400">{r.paquete_nombre} — {String(r.fecha_evento).slice(0, 10)}</p>
                       </div>
                       {r.calificacion ? (
                         <div className={`flex gap-0.5 ${r.calificacion >= 4 ? 'text-green-600' : r.calificacion >= 3 ? 'text-yellow-600' : 'text-red-600'}`}>
@@ -2244,8 +2249,8 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-3">
               <Smartphone className="w-6 h-6" />
               <div>
-                <p className="font-bold text-sm">🚨 QR — Botón de Pánico</p>
-                <p className="text-xs text-white/80">Reportes e incidentes vía WhatsApp</p>
+                <p className="font-bold text-sm">📱 QR de opiniones y soporte</p>
+                <p className="text-xs text-white/80">Reseñas, quejas y reportes en una sola página</p>
               </div>
               <span className="ml-auto text-lg">→</span>
             </div>

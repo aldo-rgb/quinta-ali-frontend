@@ -27,6 +27,14 @@ interface GoogleReview {
   fecha: number;
 }
 
+// Reseñas del QR que el admin publicó (/api/opiniones/publicas)
+interface ResenaLocal {
+  id: number;
+  calificacion: number;
+  comentario: string | null;
+  nombre: string;
+}
+
 export default function Home() {
   const { t, locale } = useI18n();
   const { data: session } = useSession();
@@ -53,6 +61,7 @@ export default function Home() {
   // Reviews state
   const [googleReviews, setGoogleReviews] = useState<GoogleReview[]>([]);
   const [reviewsCargando, setReviewsCargando] = useState(true);
+  const [resenasLocales, setResenasLocales] = useState<ResenaLocal[]>([]);
 
   // B2B modal state
   const [b2bOpen, setB2bOpen] = useState(false);
@@ -86,6 +95,11 @@ export default function Home() {
         setAreaFotosAll(allPorArea);
       }
     }).catch(() => {});
+
+    // Reseñas del QR publicadas por el admin
+    fetchAPI('/api/opiniones/publicas')
+      .then((data) => { if (Array.isArray(data?.resenas)) setResenasLocales(data.resenas); })
+      .catch(() => {});
 
     // Cargar reviews de Google Maps
     const loadGoogleReviews = async () => {
@@ -407,8 +421,39 @@ export default function Home() {
               <div className="inline-block w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></div>
               <p className="text-sm text-gray-400 mt-2">{t('home.cargando')}</p>
             </div>
-          ) : googleReviews && googleReviews.length > 0 ? (
-            googleReviews.map((review, i) => (
+          ) : resenasLocales.length > 0 || (googleReviews && googleReviews.length > 0) ? (
+            <>
+            {resenasLocales.map((resena) => (
+              <div key={`local-${resena.id}`} className="bg-white/70 rounded-2xl p-5 border border-primary-light/15 shadow-sm">
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, s) => (
+                    <svg
+                      key={s}
+                      className={`w-4 h-4 ${s < resena.calificacion ? 'text-amber-400' : 'text-gray-300'}`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                {resena.comentario && (
+                  <p className="text-sm text-gray-600 italic leading-relaxed">&quot;{resena.comentario}&quot;</p>
+                )}
+                <div className="flex items-center gap-3 mt-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">
+                      {resena.nombre.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{resena.nombre}</p>
+                    <p className="text-xs text-gray-400">{locale === 'es' ? 'Reseña en La Quinta de Alí' : 'Review at La Quinta de Alí'}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(googleReviews ?? []).map((review, i) => (
               <div key={i} className="bg-white/70 rounded-2xl p-5 border border-primary-light/15 shadow-sm">
                 <div className="flex items-center gap-1 mb-3">
                   {[...Array(5)].map((_, s) => (
@@ -455,7 +500,8 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            ))
+            ))}
+            </>
           ) : (
             // Fallback a testimonios estáticos si no hay reviews de Google
             [1, 2, 3].map((i) => {
